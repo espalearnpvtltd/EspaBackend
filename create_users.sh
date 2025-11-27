@@ -1,0 +1,21 @@
+#!/bin/bash
+
+API_URL="http://localhost:5000/api/auth/register"
+
+for i in {1..5}
+do
+  echo "Creating User $i..."
+
+  curl -X POST $API_URL \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"name\": \"User$i\",
+    \"email\": \"user$i@example.com\",
+    \"mobile\": \"+91990000000$i\",
+    \"password\": \"password$i\",
+    \"role\": \"Internal Guardian\"
+  }"
+
+  echo ""
+  echo "-----------------------------"
+done
