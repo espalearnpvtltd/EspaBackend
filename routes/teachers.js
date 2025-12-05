@@ -1,62 +1,32 @@
-// routes/teachers.js
-import express from "express";
-import Teacher from "../models/Teacher.js";
-import { verifyToken } from "../middleware/auth.js";
+import express from 'express';
+import {
+  createTeacher,
+  getAllTeachers,
+  getTeacher,
+  updateTeacher,
+  deleteTeacher,
+  markTeacherAttendance
+} from '../controllers/teacherController.js';
+import { authenticate, authorizeRoles } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// CREATE a new Teacher (Protected)
-router.post("/", verifyToken, async (req, res) => {
-  try {
-    const newTeacher = new Teacher(req.body);
-    const savedTeacher = await newTeacher.save();
-    res.status(201).json(savedTeacher);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+// ✅ Create a teacher (admin only)
+router.post('/', authenticate, authorizeRoles('admin'), createTeacher);
 
-// GET all Teachers (Protected)
-router.get("/", verifyToken, async (req, res) => {
-  try {
-    const teachers = await Teacher.find();
-    res.json(teachers);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+// ✅ Get all teachers
+router.get('/', authenticate, getAllTeachers);
 
-// GET a single Teacher by ID (Protected)
-router.get("/:id", verifyToken, async (req, res) => {
-  try {
-    const teacher = await Teacher.findById(req.params.id);
-    if (!teacher) return res.status(404).json({ message: "Teacher not found" });
-    res.json(teacher);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+// ✅ Get single teacher
+router.get('/:id', authenticate, getTeacher);
 
-// UPDATE a Teacher by ID (Protected)
-router.put("/:id", verifyToken, async (req, res) => {
-  try {
-    const updatedTeacher = await Teacher.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updatedTeacher) return res.status(404).json({ message: "Teacher not found" });
-    res.json(updatedTeacher);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+// ✅ Update teacher (admin only)
+router.put('/:id', authenticate, authorizeRoles('admin'), updateTeacher);
 
-// DELETE a Teacher by ID (Protected)
-router.delete("/:id", verifyToken, async (req, res) => {
-  try {
-    const deletedTeacher = await Teacher.findByIdAndDelete(req.params.id);
-    if (!deletedTeacher) return res.status(404).json({ message: "Teacher not found" });
-    res.json({ message: "Teacher deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+// ✅ Delete teacher (admin only)
+router.delete('/:id', authenticate, authorizeRoles('admin'), deleteTeacher);
+
+// ✅ Mark attendance for teacher (admin or teacher)
+router.post('/:id/attendance', authenticate, authorizeRoles('admin', 'teacher'), markTeacherAttendance);
 
 export default router;

@@ -1,16 +1,12 @@
-import express from "express";
-import { verifyToken } from "../middleware/auth.js";
-import { createUser, loginUser, getAllUsers } from "../controllers/userController.js";
+import express from 'express';
+import { getAllUsers, getUser, updateUser, deleteUser } from '../controllers/userController.js';
+import { authenticate, authorizeRoles } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// POST /api/users -> Create/Register user
-router.post("/", createUser);
-
-// POST /api/users/login -> Login
-router.post("/login", loginUser);
-
-// GET /api/users -> Get all users (Protected)
-router.get("/", verifyToken, getAllUsers);
+router.get('/', authenticate, authorizeRoles('admin', 'superadmin'), getAllUsers);
+router.get('/:id', authenticate, getUser);
+router.put('/:id', authenticate, authorizeRoles('admin', 'superadmin'), updateUser);
+router.delete('/:id', authenticate, authorizeRoles('admin', 'superadmin'), deleteUser);
 
 export default router;
