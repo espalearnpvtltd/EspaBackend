@@ -3,7 +3,9 @@ import {
   registerStudent,
   loginStudent,
   refreshStudentAccessToken,
-  logoutStudent
+  logoutStudent,
+  forgotPassword,
+  resetPassword
 } from '../controllers/studentAuthController.js';
 import { authenticateStudent } from '../middleware/auth.js';
 
@@ -20,5 +22,11 @@ router.post('/refresh', refreshStudentAccessToken);
 
 // ✅ Logout
 router.post('/logout', authenticateStudent, logoutStudent);
+
+// ✅ Forgot Password
+router.post('/forgot-password', forgotPassword);
+
+// ✅ Reset Password
+router.post('/reset-password', resetPassword);
 
 export default router;

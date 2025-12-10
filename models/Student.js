@@ -10,6 +10,8 @@ const studentSchema = new mongoose.Schema({
   refreshToken: { type: String },
   parentsName: { type: String },
   parentsPhone: { type: String },
+  resetPasswordToken: { type: String },
+  resetPasswordExpire: { type: Date },
   status: { type: String, enum: ['active', 'inactive'], default: 'active' }
 }, { timestamps: true });
 

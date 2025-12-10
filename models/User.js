@@ -18,6 +18,8 @@ const userSchema = new mongoose.Schema({
   gender: { type: String, enum: ['male', 'female', 'other'] },
   profileImage: { type: String },
   refreshToken: { type: String },
+  resetPasswordToken: { type: String },
+  resetPasswordExpire: { type: Date },
   status: { type: String, enum: ['active', 'inactive'], default: 'active' },
 }, { timestamps: true });
 

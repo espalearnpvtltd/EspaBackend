@@ -1,5 +1,6 @@
 import Student from '../models/Student.js';
 import jwt from 'jsonwebtoken';
+import { generateResetToken, hashResetToken, isTokenExpired } from '../utils/passwordReset.js';
 
 // Token generators
 const generateAccessToken = (id, email) =>
@@ -188,3 +189,102 @@ export const logoutStudent = async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 };
+
+// ============================================
+// FORGOT PASSWORD (for Students)
+// ============================================
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    // Find student
+    const student = await Student.findOne({ email });
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
+    }
+
+    // Generate reset token
+    const resetToken = generateResetToken();
+    const hashedToken = hashResetToken(resetToken);
+
+    // Save hashed token and expiration to DB (token expires in 15 minutes)
+    student.resetPasswordToken = hashedToken;
+    student.resetPasswordExpire = new Date(Date.now() + 15 * 60 * 1000);
+    await student.save();
+
+    console.log('🔐 Password reset token generated for:', email);
+
+    res.status(200).json({
+      message: 'Password reset link sent to email ✅',
+      resetToken: resetToken,
+      resetUrl: `http://localhost:3000/reset-password?token=${resetToken}`
+    });
+  } catch (err) {
+    console.error('Forgot Password Error:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ============================================
+// RESET PASSWORD (for Students)
+// ============================================
+export const resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword, confirmPassword } = req.body;
+
+    if (!token || !newPassword || !confirmPassword) {
+      return res.status(400).json({ message: 'Token and passwords are required' });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: 'Passwords do not match' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    }
+
+    // Hash the token to match with DB
+    const hashedToken = hashResetToken(token);
+
+    // Find student with reset token
+    const student = await Student.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: new Date() }
+    });
+
+    if (!student) {
+      return res.status(400).json({ message: 'Invalid or expired reset token' });
+    }
+
+    // Check if token is expired
+    if (isTokenExpired(student.resetPasswordExpire)) {
+      return res.status(400).json({ message: 'Reset token has expired' });
+    }
+
+    // Update password
+    student.password = newPassword;
+    student.resetPasswordToken = null;
+    student.resetPasswordExpire = null;
+    await student.save();
+
+    console.log('✅ Password reset successfully for:', student.email);
+
+    res.status(200).json({
+      message: 'Password reset successful ✅',
+      student: {
+        id: student._id,
+        name: student.name,
+        email: student.email
+      }
+    });
+  } catch (err) {
+    console.error('Reset Password Error:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+

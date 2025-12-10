@@ -1,5 +1,6 @@
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
+import { generateResetToken, hashResetToken, isTokenExpired } from '../utils/passwordReset.js';
 
 // Token generators
 const generateAccessToken = (id, role) =>
@@ -206,3 +207,106 @@ export const logoutUser = async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 };
+
+// ============================================
+// FORGOT PASSWORD
+// ============================================
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    // Find user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Generate reset token
+    const resetToken = generateResetToken();
+    const hashedToken = hashResetToken(resetToken);
+
+    // Save hashed token and expiration to DB (token expires in 15 minutes)
+    user.resetPasswordToken = hashedToken;
+    user.resetPasswordExpire = new Date(Date.now() + 15 * 60 * 1000);
+    await user.save();
+
+    // In production, send email with reset link
+    // For now, return the token (in real app, include in email)
+    console.log('🔐 Password reset token generated for:', email);
+    console.log('Reset token (send to user via email):', resetToken);
+
+    res.status(200).json({
+      message: 'Password reset link sent to email ✅',
+      // Only for development - remove in production
+      resetToken: resetToken,
+      resetUrl: `http://localhost:3000/reset-password?token=${resetToken}`
+    });
+  } catch (err) {
+    console.error('Forgot Password Error:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ============================================
+// RESET PASSWORD
+// ============================================
+export const resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword, confirmPassword } = req.body;
+
+    if (!token || !newPassword || !confirmPassword) {
+      return res.status(400).json({ message: 'Token and passwords are required' });
+    }
+
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ message: 'Passwords do not match' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    }
+
+    // Hash the token to match with DB
+    const hashedToken = hashResetToken(token);
+
+    // Find user with reset token
+    const user = await User.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: new Date() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Invalid or expired reset token' });
+    }
+
+    // Check if token is expired
+    if (isTokenExpired(user.resetPasswordExpire)) {
+      return res.status(400).json({ message: 'Reset token has expired' });
+    }
+
+    // Update password
+    user.password = newPassword;
+    user.resetPasswordToken = null;
+    user.resetPasswordExpire = null;
+    await user.save();
+
+    console.log('✅ Password reset successfully for:', user.email);
+
+    res.status(200).json({
+      message: 'Password reset successful ✅',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email
+      }
+    });
+  } catch (err) {
+    console.error('Reset Password Error:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
