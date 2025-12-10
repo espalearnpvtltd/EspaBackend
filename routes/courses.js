@@ -1,13 +1,31 @@
 import express from 'express';
-import { createCourse, getAllCourses, getCourse, updateCourse, deleteCourse } from '../controllers/courseController.js';
-import { authenticate, authorizeRoles } from '../middleware/auth.js';
+import { 
+  createCourse, 
+  getAllCourses, 
+  getCourse, 
+  updateCourse, 
+  deleteCourse, 
+  addRating, 
+  getCourseWithRatings,
+  getRecommendedByClass,
+  getCoursesByStream,
+  getCoursesByExam,
+  getFilteredCourses
+} from '../controllers/courseController.js';
+import { verifySecretKey, authenticateUser } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.post('/', authenticate, authorizeRoles('admin', 'teacher'), createCourse);
-router.get('/', authenticate, getAllCourses);
-router.get('/:id', authenticate, getCourse);
-router.put('/:id', authenticate, authorizeRoles('admin', 'teacher'), updateCourse);
-router.delete('/:id', authenticate, authorizeRoles('admin', 'teacher'), deleteCourse);
+router.post('/', verifySecretKey, createCourse);
+router.get('/', getAllCourses);
+router.get('/recommended/by-class', getRecommendedByClass);
+router.get('/filter/all', getFilteredCourses);
+router.get('/stream/:stream', getCoursesByStream);
+router.get('/exam/:exam', getCoursesByExam);
+router.get('/:id/details', getCourseWithRatings);
+router.get('/:id', getCourse);
+router.put('/:id', verifySecretKey, updateCourse);
+router.delete('/:id', verifySecretKey, deleteCourse);
+router.post('/:id/rating', addRating);
 
 export default router;

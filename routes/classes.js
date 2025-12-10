@@ -7,13 +7,14 @@ import {
   updateClass,
   deleteClass
 } from '../controllers/classController.js';
+import { verifySecretKey } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.post('/', createClass);
+router.post('/', verifySecretKey, createClass);
 router.get('/', getAllClasses);
 router.get('/:id', getClass);
-router.put('/:id', updateClass);
-router.delete('/:id', deleteClass);
+router.put('/:id', verifySecretKey, updateClass);
+router.delete('/:id', verifySecretKey, deleteClass);
 
 export default router;

@@ -7,26 +7,26 @@ import {
   deleteTeacher,
   markTeacherAttendance
 } from '../controllers/teacherController.js';
-import { authenticate, authorizeRoles } from '../middleware/auth.js';
+import { verifySecretKey } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// ✅ Create a teacher (admin only)
-router.post('/', authenticate, authorizeRoles('admin'), createTeacher);
+// ✅ Create a teacher (requires secret key)
+router.post('/', verifySecretKey, createTeacher);
 
 // ✅ Get all teachers
-router.get('/', authenticate, getAllTeachers);
+router.get('/', getAllTeachers);
 
 // ✅ Get single teacher
-router.get('/:id', authenticate, getTeacher);
+router.get('/:id', getTeacher);
 
-// ✅ Update teacher (admin only)
-router.put('/:id', authenticate, authorizeRoles('admin'), updateTeacher);
+// ✅ Update teacher (requires secret key)
+router.put('/:id', verifySecretKey, updateTeacher);
 
-// ✅ Delete teacher (admin only)
-router.delete('/:id', authenticate, authorizeRoles('admin'), deleteTeacher);
+// ✅ Delete teacher (requires secret key)
+router.delete('/:id', verifySecretKey, deleteTeacher);
 
-// ✅ Mark attendance for teacher (admin or teacher)
-router.post('/:id/attendance', authenticate, authorizeRoles('admin', 'teacher'), markTeacherAttendance);
+// ✅ Mark attendance for teacher (requires secret key)
+router.post('/:id/attendance', verifySecretKey, markTeacherAttendance);
 
 export default router;

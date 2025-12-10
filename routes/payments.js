@@ -7,14 +7,14 @@ import {
   updatePayment,
   deletePayment
 } from '../controllers/paymentController.js';
-import { authenticate, authorizeRoles } from '../middleware/auth.js';
+import { verifySecretKey } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.post('/', authenticate, authorizeRoles('admin'), createPayment);
-router.get('/', authenticate, authorizeRoles('admin', 'teacher'), getAllPayments);
-router.get('/:id', authenticate, authorizeRoles('admin', 'teacher'), getPayment);
-router.put('/:id', authenticate, authorizeRoles('admin'), updatePayment);
-router.delete('/:id', authenticate, authorizeRoles('admin'), deletePayment);
+router.post('/', verifySecretKey, createPayment);
+router.get('/', getAllPayments);
+router.get('/:id', getPayment);
+router.put('/:id', verifySecretKey, updatePayment);
+router.delete('/:id', verifySecretKey, deletePayment);
 
 export default router;

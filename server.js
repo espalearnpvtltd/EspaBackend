@@ -6,6 +6,10 @@ import mongoose from 'mongoose';
 
 import authRoutes from './routes/auth.js';
 import studentRoutes from './routes/students.js';
+import courseRoutes from './routes/courses.js';
+import classRoutes from './routes/classes.js';
+import teacherRoutes from './routes/teachers.js';
+import paymentRoutes from './routes/payments.js';
 import { initializeRedis } from './utils/cache.js';
 
 dotenv.config();
@@ -55,6 +59,10 @@ const startServer = async () => {
     // =====================
     app.use('/api/auth', authRoutes);
     app.use('/api/students', studentRoutes);
+    app.use('/api/courses', courseRoutes);
+    app.use('/api/classes', classRoutes);
+    app.use('/api/teachers', teacherRoutes);
+    app.use('/api/payments', paymentRoutes);
 
     // =====================
     // Start server

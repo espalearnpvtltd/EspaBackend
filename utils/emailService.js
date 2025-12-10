@@ -4,10 +4,12 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 /**
- * Create email transporter using SMTP
+ * Create email transporter using Amazon SES
  */
 const transporter = nodemailer.createTransport({
-  service: process.env.SMTP_SERVICE || 'gmail',
+  host: 'email-smtp.us-east-1.amazonaws.com',
+  port: 587,
+  secure: false,
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASSWORD

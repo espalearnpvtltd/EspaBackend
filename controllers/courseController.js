@@ -3,10 +3,19 @@ import Course from '../models/Course.js';
 // ✅ Create Course
 export const createCourse = async (req, res) => {
   try {
-    const { name, description, classId } = req.body;
+    const { name, description, classId, subject, teacherId, filepath, class: className, pictures } = req.body;
     if (!name) return res.status(400).json({ message: 'Name is required' });
 
-    const course = await Course.create({ name, description, classId });
+    const course = await Course.create({ 
+      name, 
+      description, 
+      classId,
+      subject,
+      teacherId,
+      filepath,
+      class: className,
+      pictures: pictures || []
+    });
     res.status(201).json({ message: 'Course created', course });
   } catch (error) {
     console.error(error);
@@ -55,6 +64,146 @@ export const deleteCourse = async (req, res) => {
     const deletedCourse = await Course.findByIdAndDelete(req.params.id);
     if (!deletedCourse) return res.status(404).json({ message: 'Course not found' });
     res.status(200).json({ message: 'Course deleted' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ✅ Add Rating/Review to Course
+export const addRating = async (req, res) => {
+  try {
+    const { courseId, studentId, rating, comment } = req.body;
+
+    if (!rating || rating < 1 || rating > 5) {
+      return res.status(400).json({ message: 'Rating must be between 1 and 5' });
+    }
+
+    const course = await Course.findById(courseId);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+
+    // Add review
+    course.ratings.reviews.push({
+      studentId,
+      rating,
+      comment
+    });
+
+    // Calculate average rating
+    const totalRating = course.ratings.reviews.reduce((sum, review) => sum + review.rating, 0);
+    course.ratings.average = (totalRating / course.ratings.reviews.length).toFixed(1);
+    course.ratings.count = course.ratings.reviews.length;
+
+    await course.save();
+    res.status(201).json({ message: 'Rating added', course });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ✅ Get Course with Ratings
+export const getCourseWithRatings = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id)
+      .populate('teacherId', 'name email')
+      .populate('ratings.reviews.studentId', 'name email');
+    
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+    res.status(200).json({ course });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ✅ Get Recommended Courses by Class
+export const getRecommendedByClass = async (req, res) => {
+  try {
+    const { class: studentClass } = req.query;
+    if (!studentClass) {
+      return res.status(400).json({ message: 'Class parameter required' });
+    }
+
+    const courses = await Course.find({ 
+      class: studentClass,
+      isRecommended: true 
+    }).populate('teacherId', 'name email');
+
+    res.status(200).json({ 
+      message: `Recommended courses for class ${studentClass}`,
+      courses 
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ✅ Get Courses by Stream (Science, Commerce, Arts)
+export const getCoursesByStream = async (req, res) => {
+  try {
+    const { stream, class: studentClass } = req.query;
+    if (!stream) {
+      return res.status(400).json({ message: 'Stream parameter required' });
+    }
+
+    let query = { stream };
+    if (studentClass) query.class = studentClass;
+
+    const courses = await Course.find(query).populate('teacherId', 'name email');
+
+    res.status(200).json({ 
+      message: `Courses for ${stream} stream`,
+      courses 
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ✅ Get Courses by Exam Type (JEE, NEET, UPSC)
+export const getCoursesByExam = async (req, res) => {
+  try {
+    const { exam, class: studentClass } = req.query;
+    if (!exam) {
+      return res.status(400).json({ message: 'Exam parameter required' });
+    }
+
+    let query = { examType: exam };
+    if (studentClass) query.class = studentClass;
+
+    const courses = await Course.find(query).populate('teacherId', 'name email');
+
+    res.status(200).json({ 
+      message: `Courses for ${exam} exam preparation`,
+      courses 
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ✅ Get Filtered Courses (Class + Stream + Exam)
+export const getFilteredCourses = async (req, res) => {
+  try {
+    const { class: studentClass, stream, exam } = req.query;
+    let query = {};
+
+    if (studentClass) query.class = studentClass;
+    if (stream) query.stream = stream;
+    if (exam) query.examType = exam;
+
+    const courses = await Course.find(query)
+      .populate('teacherId', 'name email')
+      .sort({ 'ratings.average': -1 });
+
+    res.status(200).json({ 
+      message: 'Filtered courses',
+      courses 
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server Error' });
