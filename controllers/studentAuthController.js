@@ -13,7 +13,7 @@ const generateRefreshToken = (id, email) =>
 // ============================================
 export const registerStudent = async (req, res) => {
   try {
-    const { name, email, password, class: studentClass, teacherId, parentsName, parentsPhone } = req.body;
+    const { name, email, password, class: studentClass, parentsName, parentsPhone } = req.body;
 
     // Validate required fields
     if (!name || !email || !password || !studentClass) {
@@ -32,7 +32,6 @@ export const registerStudent = async (req, res) => {
       email,
       password,
       class: studentClass,
-      teacherId,
       parentsName,
       parentsPhone,
       status: 'active'

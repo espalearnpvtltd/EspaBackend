@@ -3,10 +3,10 @@ import Course from '../models/Course.js';
 // ✅ Create Course
 export const createCourse = async (req, res) => {
   try {
-    const { name, description, teacherId, classId } = req.body;
-    if (!name || !teacherId) return res.status(400).json({ message: 'Name and teacherId are required' });
+    const { name, description, classId } = req.body;
+    if (!name) return res.status(400).json({ message: 'Name is required' });
 
-    const course = await Course.create({ name, description, teacherId, classId });
+    const course = await Course.create({ name, description, classId });
     res.status(201).json({ message: 'Course created', course });
   } catch (error) {
     console.error(error);
@@ -17,7 +17,7 @@ export const createCourse = async (req, res) => {
 // ✅ Get All Courses
 export const getAllCourses = async (req, res) => {
   try {
-    const courses = await Course.find().populate('teacherId', 'name email').populate('classId', 'name');
+    const courses = await Course.find().populate('classId', 'name');
     res.status(200).json({ courses });
   } catch (error) {
     console.error(error);
@@ -28,7 +28,7 @@ export const getAllCourses = async (req, res) => {
 // ✅ Get Single Course
 export const getCourse = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id).populate('teacherId', 'name email').populate('classId', 'name');
+    const course = await Course.findById(req.params.id).populate('classId', 'name');
     if (!course) return res.status(404).json({ message: 'Course not found' });
     res.status(200).json({ course });
   } catch (error) {

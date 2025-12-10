@@ -4,12 +4,12 @@ import Class from '../models/Class.js';
 // ✅ Create Class
 export const createClass = async (req, res) => {
   try {
-    const { name, teacherId } = req.body;
-    if (!name || !teacherId) {
-      return res.status(400).json({ message: 'Name and teacherId are required' });
+    const { name } = req.body;
+    if (!name) {
+      return res.status(400).json({ message: 'Name is required' });
     }
 
-    const newClass = await Class.create({ name, teacherId });
+    const newClass = await Class.create({ name });
     res.status(201).json({ message: 'Class created', class: newClass });
   } catch (error) {
     console.error(error);
@@ -20,7 +20,7 @@ export const createClass = async (req, res) => {
 // ✅ Get All Classes
 export const getAllClasses = async (req, res) => {
   try {
-    const classes = await Class.find().populate('teacherId', 'name email');
+    const classes = await Class.find();
     res.status(200).json({ classes });
   } catch (error) {
     console.error(error);
@@ -31,7 +31,7 @@ export const getAllClasses = async (req, res) => {
 // ✅ Get Single Class
 export const getClass = async (req, res) => {
   try {
-    const singleClass = await Class.findById(req.params.id).populate('teacherId', 'name email');
+    const singleClass = await Class.findById(req.params.id);
     if (!singleClass) {
       return res.status(404).json({ message: 'Class not found' });
     }

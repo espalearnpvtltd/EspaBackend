@@ -6,7 +6,6 @@ const studentSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   class: { type: String, required: true },
-  teacherId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   token: { type: String },
   refreshToken: { type: String },
   parentsName: { type: String },
