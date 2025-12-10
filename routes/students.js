@@ -13,7 +13,9 @@ import {
   refreshStudentAccessToken,
   logoutStudent,
   forgotPassword,
-  resetPassword
+  resetPassword,
+  verifyResetToken,
+  verifyStudentToken
 } from '../controllers/studentController.js';
 import { authenticateUser, authenticateStudent, verifySecretKey } from '../middleware/auth.js';
 
@@ -27,7 +29,7 @@ const router = express.Router();
 router.post('/register', verifySecretKey, registerStudent);
 
 // ✅ Student Login
-router.post('/login', loginStudent);
+router.post('/login', verifySecretKey,loginStudent);
 
 // ✅ Refresh Token
 router.post('/refresh', refreshStudentAccessToken);
@@ -40,6 +42,12 @@ router.post('/forgot-password', forgotPassword);
 
 // ✅ Reset Password
 router.post('/reset-password', resetPassword);
+
+// ✅ Verify Reset Token
+router.post('/verify-reset-token', verifyResetToken);
+
+// ✅ Verify Student JWT Token
+router.post('/verify-token', verifyStudentToken);
 
 // ============================================
 // STUDENT MANAGEMENT ROUTES

@@ -400,3 +400,78 @@ export const resetPassword = async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 };
+
+// ============================================
+// VERIFY RESET TOKEN
+// ============================================
+export const verifyResetToken = async (req, res) => {
+  try {
+    const { token, secret } = req.body;
+
+    if (!token || !secret) {
+      return res.status(400).json({ message: 'Token and secret are required' });
+    }
+
+    if (secret !== process.env.PASSWORD_RESET_SECRET) {
+      return res.status(403).json({ message: 'Invalid secret key' });
+    }
+
+    const hashedToken = hashResetToken(token);
+
+    const student = await Student.findOne({
+      resetPasswordToken: hashedToken,
+      resetPasswordExpire: { $gt: new Date() }
+    });
+
+    if (!student) {
+      return res.status(400).json({ message: 'Invalid or expired reset token' });
+    }
+
+    if (isTokenExpired(student.resetPasswordExpire)) {
+      return res.status(400).json({ message: 'Reset token has expired' });
+    }
+
+    res.status(200).json({
+      message: 'Reset token is valid ✅',
+      valid: true,
+      studentEmail: student.email
+    });
+  } catch (err) {
+    console.error('Verify Reset Token Error:', err);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ============================================
+// VERIFY STUDENT JWT TOKEN
+// ============================================
+export const verifyStudentToken = async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+
+    if (!token) {
+      return res.status(401).json({ message: 'No token provided', valid: false });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const student = await Student.findById(decoded.id).select('-password -refreshToken');
+
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found', valid: false });
+    }
+
+    res.status(200).json({
+      message: 'JWT Token is valid ✅',
+      valid: true,
+      student: {
+        id: student._id,
+        name: student.name,
+        email: student.email,
+        class: student.class
+      }
+    });
+  } catch (err) {
+    console.error('Verify Token Error:', err);
+    res.status(401).json({ message: 'Invalid or expired token', valid: false });
+  }
+};
