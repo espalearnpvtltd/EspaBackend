@@ -12,20 +12,37 @@ import {
   getCoursesByExam,
   getFilteredCourses
 } from '../controllers/courseController.js';
-import { verifySecretKey, authenticateUser } from '../middleware/auth.js';
+import { verifySecretKey, authenticateUser, authenticateStudent } from '../middleware/auth.js';
 
 const router = express.Router();
 
+// Admin only - Create, Update, Delete
 router.post('/', verifySecretKey, createCourse);
-router.get('/', getAllCourses);
-router.get('/recommended/by-class', getRecommendedByClass);
-router.get('/filter/all', getFilteredCourses);
-router.get('/stream/:stream', getCoursesByStream);
-router.get('/exam/:exam', getCoursesByExam);
-router.get('/:id/details', getCourseWithRatings);
-router.get('/:id', getCourse);
 router.put('/:id', verifySecretKey, updateCourse);
 router.delete('/:id', verifySecretKey, deleteCourse);
-router.post('/:id/rating', addRating);
+
+// Public - Get all courses (no auth)
+router.get('/', getAllCourses);
+
+// Student/User - Get course details with ratings (JWT required)
+router.get('/:id/details', authenticateStudent, getCourseWithRatings);
+
+// Student/User - Get single course (JWT required)
+router.get('/:id', authenticateStudent, getCourse);
+
+// Student/User - Add rating (JWT required)
+router.post('/:id/rating', authenticateStudent, addRating);
+
+// Student/User - Get recommended courses (JWT required)
+router.get('/recommended/by-class', authenticateStudent, getRecommendedByClass);
+
+// Student/User - Get filtered courses (JWT required)
+router.get('/filter/all', authenticateStudent, getFilteredCourses);
+
+// Student/User - Get courses by stream (JWT required)
+router.get('/stream/:stream', authenticateStudent, getCoursesByStream);
+
+// Student/User - Get courses by exam (JWT required)
+router.get('/exam/:exam', authenticateStudent, getCoursesByExam);
 
 export default router;
