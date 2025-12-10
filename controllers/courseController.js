@@ -117,14 +117,17 @@ export const getCourseWithRatings = async (req, res) => {
   }
 };
 
-// ✅ Get Recommended Courses by Class
+// ✅ Get Recommended Courses by Class (from JWT token)
 export const getRecommendedByClass = async (req, res) => {
   try {
-    const { class: studentClass } = req.query;
-    if (!studentClass) {
-      return res.status(400).json({ message: 'Class parameter required' });
+    // Get student class from authenticated user
+    const student = req.student;
+    if (!student || !student.class) {
+      return res.status(400).json({ message: 'Student class not found in token' });
     }
 
+    const studentClass = student.class;
+    
     const courses = await Course.find({ 
       class: studentClass,
       isRecommended: true 
@@ -132,6 +135,7 @@ export const getRecommendedByClass = async (req, res) => {
 
     res.status(200).json({ 
       message: `Recommended courses for class ${studentClass}`,
+      studentClass,
       courses 
     });
   } catch (error) {
