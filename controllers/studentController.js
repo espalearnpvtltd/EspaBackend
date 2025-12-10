@@ -1,12 +1,17 @@
 import Student from '../models/Student.js';
+import jwt from 'jsonwebtoken';
 
-// ✅ Create Student
+// Token generator
+const generateStudentToken = (id, email) =>
+  jwt.sign({ id, email }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+
 export const createStudent = async (req, res) => {
   try {
-    const { name, email, class: studentClass, teacherId } = req.body;
+    const { name, email, password, class: studentClass, teacherId, parentsName, parentsPhone } = req.body;
 
-    if (!name || !email || !studentClass) {
-      return res.status(400).json({ message: 'Name, Email and Class are required' });
+    if (!name || !email || !password || !studentClass) {
+      return res.status(400).json({ message: 'Name, Email, Password and Class are required' });
     }
 
     const existing = await Student.findOne({ email });
@@ -14,11 +19,18 @@ export const createStudent = async (req, res) => {
       return res.status(400).json({ message: 'Student already exists' });
     }
 
+    // Generate token for student
+    const token = generateStudentToken(email, name);
+
     const student = await Student.create({
       name,
       email,
+      password,
       class: studentClass,
       teacherId,
+      token,
+      parentsName,
+      parentsPhone,
       status: 'active'
     });
 
@@ -29,10 +41,10 @@ export const createStudent = async (req, res) => {
   }
 };
 
-// ✅ Get All Students
+// ✅ Get All Students (Authenticated - JWT required)
 export const getAllStudents = async (req, res) => {
   try {
-    const students = await Student.find().populate('teacherId', 'name email');
+    const students = await Student.find().select('-password -refreshToken').populate('teacherId', 'name email');
     res.status(200).json({ students });
   } catch (error) {
     console.error('Get All Students Error:', error);
@@ -40,10 +52,10 @@ export const getAllStudents = async (req, res) => {
   }
 };
 
-// ✅ Get Single Student
+// ✅ Get Single Student (Authenticated - JWT required)
 export const getStudent = async (req, res) => {
   try {
-    const student = await Student.findById(req.params.id).populate('teacherId', 'name email');
+    const student = await Student.findById(req.params.id).select('-password -refreshToken').populate('teacherId', 'name email');
 
     if (!student) return res.status(404).json({ message: 'Student not found' });
 
@@ -54,10 +66,13 @@ export const getStudent = async (req, res) => {
   }
 };
 
-// ✅ Update Student
+// ✅ Update Student (Authenticated - JWT required)
 export const updateStudent = async (req, res) => {
   try {
-    const student = await Student.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    // Don't allow password update here
+    const { password, ...updateData } = req.body;
+
+    const student = await Student.findByIdAndUpdate(req.params.id, updateData, { new: true }).select('-password -refreshToken');
 
     if (!student) return res.status(404).json({ message: 'Student not found' });
 
@@ -68,7 +83,7 @@ export const updateStudent = async (req, res) => {
   }
 };
 
-// ✅ Delete Student
+// ✅ Delete Student (Authenticated - JWT required)
 export const deleteStudent = async (req, res) => {
   try {
     const student = await Student.findByIdAndDelete(req.params.id);
@@ -82,7 +97,7 @@ export const deleteStudent = async (req, res) => {
   }
 };
 
-// ✅ Mark Attendance
+// ✅ Mark Attendance (Authenticated - JWT required)
 export const markAttendance = async (req, res) => {
   try {
     const student = await Student.findById(req.params.id);

@@ -1,6 +1,7 @@
 #!/bin/bash
 
-API_URL="http://localhost:5000/api/auth/register"
+API_URL="http://localhost:5001/api/auth/register"
+SECRET_KEY="admin_secret_key_12345"
 
 for i in {1..5}
 do
@@ -8,12 +9,12 @@ do
 
   curl -X POST $API_URL \
   -H "Content-Type: application/json" \
+  -H "x-secret-key: $SECRET_KEY" \
   -d "{
     \"name\": \"User$i\",
     \"email\": \"user$i@example.com\",
-    \"mobile\": \"+91990000000$i\",
     \"password\": \"password$i\",
-    \"role\": \"Internal Guardian\"
+    \"role\": \"teacher\"
   }"
 
   echo ""

@@ -1,13 +1,20 @@
 import express from 'express';
-import { registerUser, loginUser } from '../controllers/authController.js';
+import { registerUser, loginUser, refreshAccessToken, logoutUser } from '../controllers/authController.js';
+import { authenticateUser } from '../middleware/auth.js';
 
 const router = express.Router();
 
-// ✅ Register
+// ✅ User Registration
 router.post('/register', registerUser);
 
-// ✅ Login
+// ✅ User Login
 router.post('/login', loginUser);
+
+// ✅ Refresh Access Token
+router.post('/refresh', refreshAccessToken);
+
+// ✅ User Logout
+router.post('/logout', authenticateUser, logoutUser);
 
 // ✅ Test route
 router.get('/test', (req, res) => {

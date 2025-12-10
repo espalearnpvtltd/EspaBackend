@@ -1,55 +1,74 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+
+import authRoutes from './routes/auth.js';
+import studentAuthRoutes from './routes/studentAuth.js';
+import studentRoutes from './routes/students.js';
+import { initializeRedis } from './utils/cache.js';
+
+dotenv.config();
 
 const app = express();
 
+// =====================
 // Middleware
-app.use(cors());          // Allow requests from anywhere
-app.use(express.json());  // Parse JSON
-app.use(morgan('dev'));   // Logging
+// =====================
+app.use(cors());
+app.use(express.json());
+app.use(morgan('dev'));
 
+// =====================
 // Test route
+// =====================
 app.get('/', (req, res) => {
   res.send('🚀 Backend running successfully!');
 });
 
 // =====================
-// AUTH ROUTES
+// MongoDB Connection
 // =====================
-const users = []; // Temporary in-memory storage
-
-// POST /api/auth/register
-app.post('/api/auth/register', (req, res) => {
-  const { name, email, password } = req.body;
-
-  if (!name || !email || !password) {
-    return res.status(400).json({ message: 'All fields are required' });
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log('✅ MongoDB Connected');
+  } catch (err) {
+    console.error('❌ MongoDB connection error:', err.message);
+    process.exit(1); // Exit process if DB connection fails
   }
+};
 
-  const userExists = users.find(u => u.email === email);
-  if (userExists) {
-    return res.status(400).json({ message: 'User already exists' });
+// =====================
+// Main Server Initialization
+// =====================
+const startServer = async () => {
+  try {
+    // Connect to MongoDB
+    await connectDB();
+
+    // Initialize Redis Cache
+    await initializeRedis();
+
+    // =====================
+    // Routes
+    // =====================
+    app.use('/api/auth', authRoutes);
+    app.use('/api/student-auth', studentAuthRoutes);
+    app.use('/api/students', studentRoutes);
+
+    // =====================
+    // Start server
+    // =====================
+    const PORT = process.env.PORT || 5001;
+    app.listen(PORT, '0.0.0.0', () => {
+      console.log(`✅ Server running on port ${PORT}`);
+    });
+  } catch (err) {
+    console.error('❌ Server startup error:', err);
+    process.exit(1);
   }
+};
 
-  const newUser = { id: users.length + 1, name, email, password };
-  users.push(newUser);
-
-  res.status(201).json({ message: 'User registered!', user: newUser });
-});
-
-// POST /api/auth/login
-app.post('/api/auth/login', (req, res) => {
-  const { email, password } = req.body;
-
-  const user = users.find(u => u.email === email && u.password === password);
-  if (!user) return res.status(401).json({ message: 'Invalid credentials' });
-
-  res.json({ message: 'Login successful', user });
-});
-
-// Start server
-const PORT = 5001;
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`✅ Server running on port ${PORT}`);
-});
+startServer();
