@@ -1,6 +1,7 @@
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import { generateResetToken, hashResetToken, isTokenExpired } from '../utils/passwordReset.js';
+import { sendPasswordResetEmail } from '../utils/emailService.js';
 
 // Token generators
 const generateAccessToken = (id, role) =>
@@ -209,7 +210,7 @@ export const logoutUser = async (req, res) => {
 };
 
 // ============================================
-// FORGOT PASSWORD
+// REQUEST PASSWORD RESET (Send Email)
 // ============================================
 export const forgotPassword = async (req, res) => {
   try {
@@ -222,7 +223,8 @@ export const forgotPassword = async (req, res) => {
     // Find user
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      // Don't reveal if email exists for security
+      return res.status(200).json({ message: 'If email exists, reset link will be sent ✅' });
     }
 
     // Generate reset token
@@ -234,16 +236,24 @@ export const forgotPassword = async (req, res) => {
     user.resetPasswordExpire = new Date(Date.now() + 15 * 60 * 1000);
     await user.save();
 
-    // In production, send email with reset link
-    // For now, return the token (in real app, include in email)
-    console.log('🔐 Password reset token generated for:', email);
-    console.log('Reset token (send to user via email):', resetToken);
+    // Create reset URL with token and secret key for verification
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&secret=${process.env.PASSWORD_RESET_SECRET}`;
+
+    // Send email with reset link
+    try {
+      await sendPasswordResetEmail(user.email, user.name, resetUrl);
+      console.log('✅ Password reset email sent to:', email);
+    } catch (emailErr) {
+      console.error('❌ Email sending failed:', emailErr.message);
+      // Clear reset token if email fails
+      user.resetPasswordToken = null;
+      user.resetPasswordExpire = null;
+      await user.save();
+      return res.status(500).json({ message: 'Failed to send reset email' });
+    }
 
     res.status(200).json({
-      message: 'Password reset link sent to email ✅',
-      // Only for development - remove in production
-      resetToken: resetToken,
-      resetUrl: `http://localhost:3000/reset-password?token=${resetToken}`
+      message: 'Password reset link sent to email ✅'
     });
   } catch (err) {
     console.error('Forgot Password Error:', err);
@@ -252,11 +262,16 @@ export const forgotPassword = async (req, res) => {
 };
 
 // ============================================
-// RESET PASSWORD
+// RESET PASSWORD (Using Email Link)
 // ============================================
 export const resetPassword = async (req, res) => {
   try {
-    const { token, newPassword, confirmPassword } = req.body;
+    const { token, secret, newPassword, confirmPassword } = req.body;
+
+    // Verify secret key for security
+    if (!secret || secret !== process.env.PASSWORD_RESET_SECRET) {
+      return res.status(403).json({ message: 'Invalid secret key' });
+    }
 
     if (!token || !newPassword || !confirmPassword) {
       return res.status(400).json({ message: 'Token and passwords are required' });
@@ -288,7 +303,7 @@ export const resetPassword = async (req, res) => {
       return res.status(400).json({ message: 'Reset token has expired' });
     }
 
-    // Update password
+    // Update password (bcrypt hashing happens in pre-save hook)
     user.password = newPassword;
     user.resetPasswordToken = null;
     user.resetPasswordExpire = null;
@@ -297,7 +312,7 @@ export const resetPassword = async (req, res) => {
     console.log('✅ Password reset successfully for:', user.email);
 
     res.status(200).json({
-      message: 'Password reset successful ✅',
+      message: 'Password reset successful ✅. Please login with your new password.',
       user: {
         id: user._id,
         name: user.name,

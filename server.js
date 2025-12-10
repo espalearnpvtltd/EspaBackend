@@ -5,7 +5,6 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 
 import authRoutes from './routes/auth.js';
-import studentAuthRoutes from './routes/studentAuth.js';
 import studentRoutes from './routes/students.js';
 import { initializeRedis } from './utils/cache.js';
 
@@ -55,7 +54,6 @@ const startServer = async () => {
     // Routes
     // =====================
     app.use('/api/auth', authRoutes);
-    app.use('/api/student-auth', studentAuthRoutes);
     app.use('/api/students', studentRoutes);
 
     // =====================
