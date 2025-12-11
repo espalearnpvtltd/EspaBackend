@@ -3,18 +3,37 @@ import Course from '../models/Course.js';
 // ✅ Create Course
 export const createCourse = async (req, res) => {
   try {
-    const { name, description, classId, subject, teacherId, filepath, class: className, pictures } = req.body;
-    if (!name) return res.status(400).json({ message: 'Name is required' });
+    const { title, name, description, classId, subject, teacherId, filepath, class: className, pictures, stream, examType, difficulty, isRecommended, price, discountPercentage, duration } = req.body;
+    
+    // Use title if provided, otherwise use name
+    const courseTitle = title || name;
+    if (!courseTitle) return res.status(400).json({ message: 'Title or name is required' });
+
+    // Calculate discounted price if discount percentage is provided
+    let discountedPrice = undefined;
+    if (discountPercentage && price) {
+      discountedPrice = price - (price * discountPercentage / 100);
+      discountedPrice = Math.round(discountedPrice * 100) / 100; // Round to 2 decimal places
+    }
 
     const course = await Course.create({ 
-      name, 
+      title: courseTitle,
+      name: courseTitle,
       description, 
       classId,
       subject,
       teacherId,
       filepath,
       class: className,
-      pictures: pictures || []
+      pictures: pictures || [],
+      stream: stream || 'general',
+      examType: examType || [],
+      difficulty: difficulty || 'intermediate',
+      isRecommended: isRecommended || false,
+      price,
+      discountPercentage: discountPercentage || 0,
+      discountedPrice,
+      duration
     });
     res.status(201).json({ message: 'Course created', course });
   } catch (error) {
@@ -49,7 +68,16 @@ export const getCourse = async (req, res) => {
 // ✅ Update Course
 export const updateCourse = async (req, res) => {
   try {
-    const updatedCourse = await Course.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const { price, discountPercentage } = req.body;
+    const updateData = { ...req.body };
+
+    // Recalculate discounted price if price or discount percentage is being updated
+    if (price && discountPercentage) {
+      updateData.discountedPrice = price - (price * discountPercentage / 100);
+      updateData.discountedPrice = Math.round(updateData.discountedPrice * 100) / 100;
+    }
+
+    const updatedCourse = await Course.findByIdAndUpdate(req.params.id, updateData, { new: true });
     if (!updatedCourse) return res.status(404).json({ message: 'Course not found' });
     res.status(200).json({ message: 'Course updated', course: updatedCourse });
   } catch (error) {
@@ -276,6 +304,42 @@ export const getRecommendedCategories = async (req, res) => {
       message: `Recommended courses for class ${studentClass}`,
       studentClass,
       categories
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ✅ Search Courses by Title, Subject, or Description
+export const searchCourses = async (req, res) => {
+  try {
+    const { query } = req.query;
+
+    if (!query || query.trim().length === 0) {
+      return res.status(400).json({ message: 'Search query is required' });
+    }
+
+    // Create regex for case-insensitive search
+    const searchRegex = new RegExp(query, 'i');
+
+    // Search in title, name, subject, and description
+    const courses = await Course.find({
+      $or: [
+        { title: { $regex: searchRegex } },
+        { name: { $regex: searchRegex } },
+        { subject: { $regex: searchRegex } },
+        { description: { $regex: searchRegex } }
+      ]
+    })
+      .populate('teacherId', 'name email')
+      .sort({ 'ratings.average': -1 })
+      .limit(20);
+
+    res.status(200).json({
+      message: `Search results for "${query}"`,
+      count: courses.length,
+      courses
     });
   } catch (error) {
     console.error(error);
