@@ -10,7 +10,8 @@ import {
   getRecommendedByClass,
   getCoursesByStream,
   getCoursesByExam,
-  getFilteredCourses
+  getFilteredCourses,
+  getRecommendedCategories
 } from '../controllers/courseController.js';
 import { verifySecretKey, authenticateUser, authenticateStudent } from '../middleware/auth.js';
 
@@ -23,6 +24,9 @@ router.delete('/:id', verifySecretKey, deleteCourse);
 
 // Public - Get all courses (no auth)
 router.get('/', getAllCourses);
+
+// Student/User - Get recommended courses with dynamic categories (JWT required)
+router.get('/recommended/categories', authenticateStudent, getRecommendedCategories);
 
 // Student/User - Get course details with ratings (JWT required)
 router.get('/:id/details', authenticateStudent, getCourseWithRatings);

@@ -213,3 +213,72 @@ export const getFilteredCourses = async (req, res) => {
     res.status(500).json({ message: 'Server Error' });
   }
 };
+
+// ✅ Get Dynamic Recommended Categories Based on Student Class
+// This returns different categories based on student's class from JWT
+export const getRecommendedCategories = async (req, res) => {
+  try {
+    const student = req.student;
+    if (!student || !student.class) {
+      return res.status(400).json({ message: 'Student class not found in token' });
+    }
+
+    const studentClass = student.class;
+    let categories = {};
+
+    // Define categories based on class
+    const classCategoryMap = {
+      '10': {
+        'Science': { stream: 'science', examType: null },
+        'Commerce': { stream: 'commerce', examType: null },
+        'Arts': { stream: 'arts', examType: null }
+      },
+      '11': {
+        'Science': { stream: 'science', examType: null },
+        'Medical': { stream: 'science', examType: 'NEET' },
+        'Non-Medical': { stream: 'science', examType: 'JEE' },
+        'Commerce': { stream: 'commerce', examType: null },
+        'Arts': { stream: 'arts', examType: null }
+      },
+      '12': {
+        'Science': { stream: 'science', examType: null },
+        'Medical': { stream: 'science', examType: 'NEET' },
+        'Non-Medical': { stream: 'science', examType: 'JEE' },
+        'Commerce': { stream: 'commerce', examType: null },
+        'Arts': { stream: 'arts', examType: null },
+        'UPSC/Polity': { stream: 'arts', examType: 'UPSC' },
+        'Engineering': { examType: 'GATE' }
+      }
+    };
+
+    const categoryMap = classCategoryMap[studentClass] || classCategoryMap['12'];
+
+    // Fetch courses for each category
+    for (const [categoryName, categoryFilter] of Object.entries(categoryMap)) {
+      let query = { class: studentClass, isRecommended: true };
+
+      if (categoryFilter.stream) {
+        query.stream = categoryFilter.stream;
+      }
+      if (categoryFilter.examType) {
+        query.examType = categoryFilter.examType;
+      }
+
+      const courses = await Course.find(query)
+        .populate('teacherId', 'name email')
+        .sort({ 'ratings.average': -1 })
+        .limit(10);
+
+      categories[categoryName] = courses;
+    }
+
+    res.status(200).json({
+      message: `Recommended courses for class ${studentClass}`,
+      studentClass,
+      categories
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
