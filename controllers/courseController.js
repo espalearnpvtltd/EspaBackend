@@ -1,24 +1,25 @@
 import Course from '../models/Course.js';
 
-// Default course images mapping
+// Default course images mapping - Using working Unsplash & Pexels URLs
 const defaultImages = {
-  physics: ["https://images.unsplash.com/photo-532012197267-da84d127e765?w=500&h=300&fit=crop"],
-  chemistry: ["https://images.unsplash.com/photo-576175192918-06d5d39f0e38?w=500&h=300&fit=crop"],
-  biology: ["https://images.unsplash.com/photo-576088160562-40f694ba6b22?w=500&h=300&fit=crop"],
-  mathematics: ["https://images.unsplash.com/photo-596524496916-bc4ee5541481?w=500&h=300&fit=crop"],
-  history: ["https://images.unsplash.com/photo-507842217343-583f20270319?w=500&h=300&fit=crop"],
-  geography: ["https://images.unsplash.com/photo-526778548025-fa2f459cd5c1?w=500&h=300&fit=crop"],
-  accountancy: ["https://images.unsplash.com/photo-552664730-d307ca884978?w=500&h=300&fit=crop"],
-  business: ["https://images.unsplash.com/photo-552664730-d307ca884978?w=500&h=300&fit=crop"],
-  economics: ["https://images.unsplash.com/photo-577720643272-265f434b3b55?w=500&h=300&fit=crop"],
-  english: ["https://images.unsplash.com/photo-507842217343-583f20270319?w=500&h=300&fit=crop"],
-  default: ["https://images.unsplash.com/photo-1533288714400-b4c3b5b11384?w=500&h=300&fit=crop"]
+  physics: ["https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=500&h=300&fit=crop"],
+  chemistry: ["https://images.unsplash.com/photo-1576174065790-cb142efc1bfc?w=500&h=300&fit=crop"],
+  biology: ["https://images.unsplash.com/photo-1576088160562-40f694ba6b22?w=500&h=300&fit=crop"],
+  zoology: ["https://www.pexels.com/photo/close-up-of-green-parakeet-in-natural-habitat-35137868/"],
+  mathematics: ["https://images.unsplash.com/photo-1516534775068-bb57c960ba1d?w=500&h=300&fit=crop"],
+  history: ["https://images.unsplash.com/photo-1507842217343-583f20270319?w=500&h=300&fit=crop"],
+  geography: ["https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=500&h=300&fit=crop"],
+  accountancy: ["https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=500&h=300&fit=crop"],
+  business: ["https://images.unsplash.com/photo-1552664730-d307ca884978?w=500&h=300&fit=crop"],
+  economics: ["https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?w=500&h=300&fit=crop"],
+  english: ["https://images.unsplash.com/photo-1507842217343-583f20270319?w=500&h=300&fit=crop"],
+  default: ["https://images.unsplash.com/photo-1516534775068-bb57c960ba1d?w=500&h=300&fit=crop"]
 };
 
 // ✅ Create Course
 export const createCourse = async (req, res) => {
   try {
-    const { name, title, description, classId, subject, teacherId, filepath, class: className, pictures, examType, difficulty, isRecommended, price, discountPercentage, duration } = req.body;
+    const { name, title, description, classId, subject, teacherId, filepath, class: className, pictures, difficulty, isRecommended, price, discountedPrice, duration } = req.body;
     
     // Accept either name or title, use name as primary
     const courseName = name || title;
@@ -31,13 +32,6 @@ export const createCourse = async (req, res) => {
       coursePictures = defaultImages[subjectLower] || defaultImages.default;
     }
 
-    // Calculate discounted price if discount percentage is provided
-    let discountedPrice = undefined;
-    if (discountPercentage && price) {
-      discountedPrice = price - (price * discountPercentage / 100);
-      discountedPrice = Math.round(discountedPrice * 100) / 100; // Round to 2 decimal places
-    }
-
     const course = await Course.create({ 
       name: courseName,
       description, 
@@ -47,11 +41,9 @@ export const createCourse = async (req, res) => {
       filepath,
       class: className,
       pictures: coursePictures,
-      examType: examType || [],
       difficulty: difficulty || 'intermediate',
       isRecommended: isRecommended || false,
       price,
-      discountPercentage: discountPercentage || 0,
       discountedPrice,
       duration
     });
@@ -88,14 +80,7 @@ export const getCourse = async (req, res) => {
 // ✅ Update Course
 export const updateCourse = async (req, res) => {
   try {
-    const { price, discountPercentage } = req.body;
     const updateData = { ...req.body };
-
-    // Recalculate discounted price if price or discount percentage is being updated
-    if (price && discountPercentage) {
-      updateData.discountedPrice = price - (price * discountPercentage / 100);
-      updateData.discountedPrice = Math.round(updateData.discountedPrice * 100) / 100;
-    }
 
     const updatedCourse = await Course.findByIdAndUpdate(req.params.id, updateData, { new: true });
     if (!updatedCourse) return res.status(404).json({ message: 'Course not found' });
