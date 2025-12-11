@@ -1,16 +1,10 @@
 import mongoose from 'mongoose';
 
 const courseSchema = new mongoose.Schema({
-  title: { type: String, required: true }, // Main title for the course
-  name: { type: String }, // Legacy field, defaults to title
+  name: { type: String, required: true }, // Course name
   description: String,
   subject: { type: String, required: true },
   class: { type: String }, // e.g., "10", "11", "12"
-  stream: { 
-    type: String, 
-    enum: ['science', 'commerce', 'arts', 'general'], 
-    default: 'general' 
-  },
   examType: [{ 
     type: String, 
     enum: ['JEE', 'NEET', 'UPSC', 'BOARDS', 'GATE', 'CAT'] 

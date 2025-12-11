@@ -1,13 +1,35 @@
 import Course from '../models/Course.js';
 
+// Default course images mapping
+const defaultImages = {
+  physics: ["https://images.unsplash.com/photo-532012197267-da84d127e765?w=500&h=300&fit=crop"],
+  chemistry: ["https://images.unsplash.com/photo-576175192918-06d5d39f0e38?w=500&h=300&fit=crop"],
+  biology: ["https://images.unsplash.com/photo-576088160562-40f694ba6b22?w=500&h=300&fit=crop"],
+  mathematics: ["https://images.unsplash.com/photo-596524496916-bc4ee5541481?w=500&h=300&fit=crop"],
+  history: ["https://images.unsplash.com/photo-507842217343-583f20270319?w=500&h=300&fit=crop"],
+  geography: ["https://images.unsplash.com/photo-526778548025-fa2f459cd5c1?w=500&h=300&fit=crop"],
+  accountancy: ["https://images.unsplash.com/photo-552664730-d307ca884978?w=500&h=300&fit=crop"],
+  business: ["https://images.unsplash.com/photo-552664730-d307ca884978?w=500&h=300&fit=crop"],
+  economics: ["https://images.unsplash.com/photo-577720643272-265f434b3b55?w=500&h=300&fit=crop"],
+  english: ["https://images.unsplash.com/photo-507842217343-583f20270319?w=500&h=300&fit=crop"],
+  default: ["https://images.unsplash.com/photo-1533288714400-b4c3b5b11384?w=500&h=300&fit=crop"]
+};
+
 // ✅ Create Course
 export const createCourse = async (req, res) => {
   try {
-    const { title, name, description, classId, subject, teacherId, filepath, class: className, pictures, stream, examType, difficulty, isRecommended, price, discountPercentage, duration } = req.body;
+    const { name, title, description, classId, subject, teacherId, filepath, class: className, pictures, examType, difficulty, isRecommended, price, discountPercentage, duration } = req.body;
     
-    // Use title if provided, otherwise use name
-    const courseTitle = title || name;
-    if (!courseTitle) return res.status(400).json({ message: 'Title or name is required' });
+    // Accept either name or title, use name as primary
+    const courseName = name || title;
+    if (!courseName) return res.status(400).json({ message: 'Course name is required' });
+
+    // Get default image based on subject if no pictures provided
+    let coursePictures = pictures;
+    if (!coursePictures || coursePictures.length === 0) {
+      const subjectLower = subject ? subject.toLowerCase() : 'default';
+      coursePictures = defaultImages[subjectLower] || defaultImages.default;
+    }
 
     // Calculate discounted price if discount percentage is provided
     let discountedPrice = undefined;
@@ -17,16 +39,14 @@ export const createCourse = async (req, res) => {
     }
 
     const course = await Course.create({ 
-      title: courseTitle,
-      name: courseTitle,
+      name: courseName,
       description, 
       classId,
       subject,
       teacherId,
       filepath,
       class: className,
-      pictures: pictures || [],
-      stream: stream || 'general',
+      pictures: coursePictures,
       examType: examType || [],
       difficulty: difficulty || 'intermediate',
       isRecommended: isRecommended || false,
@@ -175,18 +195,18 @@ export const getRecommendedByClass = async (req, res) => {
 // ✅ Get Courses by Stream (Science, Commerce, Arts)
 export const getCoursesByStream = async (req, res) => {
   try {
-    const { stream, class: studentClass } = req.query;
-    if (!stream) {
-      return res.status(400).json({ message: 'Stream parameter required' });
+    const { subject, class: studentClass } = req.query;
+    if (!subject) {
+      return res.status(400).json({ message: 'Subject parameter required' });
     }
 
-    let query = { stream };
+    let query = { subject };
     if (studentClass) query.class = studentClass;
 
     const courses = await Course.find(query).populate('teacherId', 'name email');
 
     res.status(200).json({ 
-      message: `Courses for ${stream} stream`,
+      message: `Courses for ${subject}`,
       courses 
     });
   } catch (error) {
