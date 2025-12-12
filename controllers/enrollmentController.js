@@ -252,11 +252,84 @@ export const getCoursesByClass = async (req, res) => {
   try {
     const { classLevel } = req.params;
 
-    const courses = await Course.find({ class: classLevel })
+    const courses = await Course.find({ class: classLevel, isRecommended: true })
       .select('name subject class difficulty price discountedPrice duration pictures');
 
     res.status(200).json({
-      message: `Courses for ${classLevel} retrieved`,
+      message: `Courses for class ${classLevel}`,
+      count: courses.length,
+      courses
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching courses', error: error.message });
+  }
+};
+
+// ✅ Get My Courses (Enrolled Courses with Full Details)
+export const getMyCourses = async (req, res) => {
+  try {
+    const studentId = req.student?.userId || req.student?._id;
+
+    const enrollments = await Enrollment.find({ studentId, status: { $ne: 'cancelled' } })
+      .populate({
+        path: 'courseId',
+        select: 'name description subject class difficulty price discountedPrice duration pictures instructor'
+      })
+      .sort({ enrollmentDate: -1 });
+
+    if (!enrollments || enrollments.length === 0) {
+      return res.status(200).json({
+        message: 'No enrolled courses yet',
+        count: 0,
+        courses: []
+      });
+    }
+
+    const courses = enrollments.map(enrollment => ({
+      enrollmentId: enrollment._id,
+      courseId: enrollment.courseId._id,
+      courseName: enrollment.courseId.name,
+      description: enrollment.courseId.description,
+      subject: enrollment.courseId.subject,
+      class: enrollment.courseId.class,
+      difficulty: enrollment.courseId.difficulty,
+      price: enrollment.courseId.price,
+      discountedPrice: enrollment.courseId.discountedPrice || enrollment.courseId.price,
+      duration: enrollment.courseId.duration,
+      pictures: enrollment.courseId.pictures,
+      instructor: enrollment.courseId.instructor,
+      // Enrollment Details
+      enrollmentStatus: enrollment.status,
+      progress: enrollment.progress,
+      enrollmentDate: enrollment.enrollmentDate,
+      completionDate: enrollment.completionDate,
+      certificateIssued: enrollment.certificateIssued,
+      rating: enrollment.rating,
+      feedback: enrollment.feedback
+    }));
+
+    res.status(200).json({
+      message: 'My courses retrieved successfully',
+      count: courses.length,
+      courses
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching my courses', error: error.message });
+  }
+};
+
+// ✅ Get Courses by Class (For Enrollment)
+export const getCoursesByClass = async (req, res) => {
+  try {
+    const { classLevel } = req.params;
+
+    const courses = await Course.find({ class: classLevel, isRecommended: true })
+      .select('name subject class difficulty price discountedPrice duration pictures');
+
+    res.status(200).json({
+      message: `Courses for class ${classLevel}`,
       count: courses.length,
       courses
     });
