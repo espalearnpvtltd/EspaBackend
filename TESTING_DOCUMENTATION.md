@@ -49,11 +49,11 @@ Verify course creation, retrieval, and filtering works correctly
    Expected: List of all courses
    Result: PASS ✓ - Returns 10+ courses
 
-✅ Search Courses by Subject
+✅ Search Courses by Subject - Physics
    Endpoint: GET /api/courses/search/courses?query=physics
    Auth: None
    Expected: Filter courses containing "physics"
-   Result: PASS ✓ - Found Physics courses
+   Result: PASS ✓ - Found 3 Physics courses
 
 ✅ Search Courses by Class
    Endpoint: GET /api/courses/search/courses?query=class%205
@@ -74,13 +74,40 @@ Verify course creation, retrieval, and filtering works correctly
    Result: PASS ✓ - Found mathematics courses for class
 ```
 
+### Search Results - Physics Courses
+```bash
+✅ Found 3 Physics Courses:
+
+1. Modern Physics Course (Class 12)
+   - Price: ₹3999 → ₹2999 (discounted)
+   - Duration: 95 minutes
+   - Difficulty: Intermediate
+   - Recommended: Yes
+   - ID: 693ab05e31318b0db26d7147
+
+2. Test Course Class 12 (Class 12)
+   - Price: ₹999
+   - Duration: 50 minutes
+   - Difficulty: Beginner
+   - Recommended: Yes
+   - ID: 693ba5031cff98afd4db36aa
+
+3. Physics Basics Class 11 (Class 11)
+   - Price: ₹2999 → ₹1999 (discounted)
+   - Duration: 80 minutes
+   - Difficulty: Beginner
+   - Recommended: Yes
+   - ID: 693bae881932300e630a2bd6
+```
+
 ### What Was Verified
 - Public course access works
-- Search by title/subject/class works
+- Search by subject filters correctly
+- Search returns relevant courses with full details
 - Token-based authentication works
 - Class-based filtering works
 - Search + filter combination works
-- 10 unique courses available
+- 10+ unique courses available in database
 
 ---
 
