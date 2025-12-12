@@ -1,0 +1,534 @@
+{
+  "info": {
+    "_postman_id": "your-courses-collection",
+    "name": "ESPA Learning - Your Courses Feature",
+    "description": "Complete testing guide for Your Courses feature and enrollment workflow",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Authentication",
+      "item": [
+        {
+          "name": "Register Student (Class 12)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('authToken', jsonData.tokens.access);",
+                  "    pm.environment.set('studentId', jsonData.user.id);",
+                  "    pm.environment.set('studentEmail', jsonData.user.email);",
+                  "    console.log('✅ Student registered successfully');",
+                  "    console.log('Token saved:', jsonData.tokens.access.substring(0, 20) + '...');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Test Student {{$timestamp}}\",\n  \"email\": \"student{{$timestamp}}@example.com\",\n  \"password\": \"TestPass123!\",\n  \"class\": \"12\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login Student",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('authToken', jsonData.tokens.access);",
+                  "    console.log('✅ Login successful');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{studentEmail}}\",\n  \"password\": \"TestPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Browse Courses",
+      "item": [
+        {
+          "name": "Get All Courses (Public)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('courseId', jsonData.courses[0]._id);",
+                  "    console.log('✅ Found ' + jsonData.courses.length + ' courses');",
+                  "    console.log('First course ID saved:', jsonData.courses[0]._id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/courses",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "courses"]
+            }
+          }
+        },
+        {
+          "name": "Get Recommended Courses (Your Class)",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/courses/recommended/by-class",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "courses", "recommended", "by-class"]
+            }
+          }
+        },
+        {
+          "name": "Search Courses (Physics)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/courses/search/courses?query=physics",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "courses", "search", "courses"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "physics"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Enrollment Flow (Old Method - With Payment)",
+      "item": [
+        {
+          "name": "Create Payment Order",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('orderId', jsonData.payment.orderId);",
+                  "    console.log('✅ Payment order created');",
+                  "    console.log('Order ID:', jsonData.payment.orderId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/order",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "order"]
+            }
+          }
+        },
+        {
+          "name": "Verify Payment & Enroll",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('enrollmentId', jsonData.enrollment.enrollmentId);",
+                  "    console.log('✅ Payment verified and enrolled!');",
+                  "    console.log('Enrollment ID:', jsonData.enrollment.enrollmentId);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"{{orderId}}\",\n  \"transactionId\": \"TXN_{{$timestamp}}\",\n  \"paymentMethod\": \"upi\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/verify",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "verify"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Quick Enrollment (One-Click)",
+      "item": [
+        {
+          "name": "Quick Enroll in Course",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set('enrollmentId', jsonData.enrollmentId);",
+                  "    console.log('✅ Quick enrolled successfully!');",
+                  "    console.log('Enrollment ID:', jsonData.enrollmentId);",
+                  "    console.log('Course:', jsonData.courseName);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"{{courseId}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/enroll",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "enroll"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Your Courses (Main Feature)",
+      "item": [
+        {
+          "name": "Get My Courses",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    console.log('✅ Retrieved ' + jsonData.count + ' courses');",
+                  "    if (jsonData.courses.length > 0) {",
+                  "        console.log('First course:', jsonData.courses[0].courseName);",
+                  "        console.log('Status:', jsonData.courses[0].enrollmentStatus);",
+                  "        console.log('Progress:', jsonData.courses[0].progress + '%');",
+                  "    }",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/enrollments/my-courses",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "enrollments", "my-courses"]
+            }
+          }
+        },
+        {
+          "name": "Get All Enrollments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/enrollments",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "enrollments"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Manage Enrollment",
+      "item": [
+        {
+          "name": "Update Progress (25%)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"progress\": 25\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/enrollments/{{enrollmentId}}/progress",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "enrollments", "{{enrollmentId}}", "progress"]
+            }
+          }
+        },
+        {
+          "name": "Update Progress (50%)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"progress\": 50\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/enrollments/{{enrollmentId}}/progress",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "enrollments", "{{enrollmentId}}", "progress"]
+            }
+          }
+        },
+        {
+          "name": "Update Progress (100% - Complete)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"progress\": 100\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/enrollments/{{enrollmentId}}/progress",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "enrollments", "{{enrollmentId}}", "progress"]
+            }
+          }
+        },
+        {
+          "name": "Rate Course (5 Stars)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"feedback\": \"Great course! Very informative and well-structured.\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/enrollments/{{enrollmentId}}/rate",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "enrollments", "{{enrollmentId}}", "rate"]
+            }
+          }
+        },
+        {
+          "name": "Pause Course",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/enrollments/{{enrollmentId}}/pause",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "enrollments", "{{enrollmentId}}", "pause"]
+            }
+          }
+        },
+        {
+          "name": "Resume Course",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/enrollments/{{enrollmentId}}/resume",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "enrollments", "{{enrollmentId}}", "resume"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Course",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/enrollments/{{enrollmentId}}/cancel",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "enrollments", "{{enrollmentId}}", "cancel"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5001",
+      "type": "string"
+    },
+    {
+      "key": "authToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "studentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "studentEmail",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "courseId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "enrollmentId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "orderId",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}
