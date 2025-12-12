@@ -164,13 +164,13 @@ export const getRecommendedByClass = async (req, res) => {
       studentClass = student.class;
     }
     
+    // Return ALL courses for the class (not just recommended)
     const courses = await Course.find({ 
-      class: studentClass,
-      isRecommended: true 
+      class: studentClass
     }).populate('teacherId', 'name email').sort({ 'ratings.average': -1 });
 
     res.status(200).json({ 
-      message: `Recommended courses for class ${studentClass}`,
+      message: `All courses for class ${studentClass}`,
       studentClass,
       count: courses.length,
       courses 
@@ -331,10 +331,10 @@ export const getRecommendedCategories = async (req, res) => {
   }
 };
 
-// ✅ Search Courses by Title, Subject, or Description
+// ✅ Search Courses by Title, Name, Subject, Description, or Class (optionally filter by class)
 export const searchCourses = async (req, res) => {
   try {
-    const { query } = req.query;
+    const { query, class: courseClass } = req.query;
 
     if (!query || query.trim().length === 0) {
       return res.status(400).json({ message: 'Search query is required' });
@@ -343,21 +343,34 @@ export const searchCourses = async (req, res) => {
     // Create regex for case-insensitive search
     const searchRegex = new RegExp(query, 'i');
 
-    // Search in title, name, subject, and description
-    const courses = await Course.find({
-      $or: [
-        { title: { $regex: searchRegex } },
-        { name: { $regex: searchRegex } },
-        { subject: { $regex: searchRegex } },
-        { description: { $regex: searchRegex } }
+    // Build filter object - search in title, name, subject, description, and class
+    const filter = {
+      $and: [
+        {
+          $or: [
+            { title: { $regex: searchRegex } },
+            { name: { $regex: searchRegex } },
+            { subject: { $regex: searchRegex } },
+            { description: { $regex: searchRegex } },
+            { class: { $regex: searchRegex } }
+          ]
+        }
       ]
-    })
+    };
+
+    // Add class filter if provided (narrows down results to specific class)
+    if (courseClass) {
+      filter.$and.push({ class: courseClass });
+    }
+
+    // Search in title, name, subject, description, and class
+    const courses = await Course.find(filter)
       .populate('teacherId', 'name email')
       .sort({ 'ratings.average': -1 })
       .limit(20);
 
     res.status(200).json({
-      message: `Search results for "${query}"`,
+      message: `Search results for "${query}"${courseClass ? ` in class ${courseClass}` : ''}`,
       count: courses.length,
       courses
     });
