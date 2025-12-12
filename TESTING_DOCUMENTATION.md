@@ -174,8 +174,8 @@ Step 2: Verify Payment & Create Enrollment
 ├─ Endpoint: POST /api/payments/verify
 ├─ Headers: Authorization: Bearer TOKEN
 ├─ Body: {
-│   orderId: "ORD_1765524953945_f985b83a",
-│   transactionId: "TXN_1765524960123",
+│   orderId: "ORD_1765538422917_cc915ec1",
+│   transactionId: "TXN_1765538438123456",
 │   paymentMethod: "upi"
 │ }
 └─ Output: enrollmentId, status, courseName
@@ -190,9 +190,10 @@ Step 2: Verify Payment & Create Enrollment
    Result: PASS ✓
 
 ✅ Enrollment Created Automatically
+   Enrollment ID: 693bfa87719f1ec55515bb08
    Status: active
    Progress: 0%
-   EnrollmentDate: Set correctly
+   EnrollmentDate: 2025-12-12T11:20:39.629Z
    UserId + CourseId: Linked
    Result: PASS ✓
 
@@ -204,12 +205,13 @@ Step 2: Verify Payment & Create Enrollment
 
 ### What Was Verified
 - Payment status updates to "completed"
-- Transaction ID stored
+- Transaction ID stored and unique constraint enforced
 - Payment date recorded
-- Enrollment created automatically
+- Enrollment created automatically with courseId
 - Enrollment status set to "active"
 - Progress initialized to 0%
 - Unique constraint (one enrollment per user-course) works
+- Course data properly linked to enrollment
 
 ---
 
@@ -275,6 +277,77 @@ Verify all enrollment operations work correctly
 - Resume functionality works
 - Cancellation works
 - Status transitions work correctly
+
+---
+
+## 🎓 TEST 5B: Your Courses Frontend Display
+
+### Purpose
+Verify that enrolled courses appear correctly in "Your Courses" section
+
+### What Appears in Your Courses
+After a student enrolls in "Modern Physics Course", the following data is displayed:
+
+```json
+{
+  "message": "My courses retrieved successfully",
+  "count": 1,
+  "courses": [
+    {
+      "enrollmentId": "693bfa87719f1ec55515bb08",
+      "courseId": "693ab05e31318b0db26d7147",
+      "courseName": "Modern Physics Course",
+      "description": "Complete Physics course",
+      "subject": "Physics",
+      "class": "12",
+      "difficulty": "intermediate",
+      "price": 3999,
+      "discountedPrice": 2999,
+      "duration": 95,
+      "pictures": [
+        "https://images.unsplash.com/photo-1446776653964-20c1d3a81b06?w=500&h=300&fit=crop"
+      ],
+      "enrollmentStatus": "active",
+      "progress": 0,
+      "enrollmentDate": "2025-12-12T11:20:39.629Z",
+      "completionDate": null,
+      "certificateIssued": false,
+      "rating": null,
+      "feedback": null
+    }
+  ]
+}
+```
+
+### Frontend Card Display
+The course appears as a **responsive card** showing:
+
+| Element | Value | Status |
+|---------|-------|--------|
+| Course Image | Unsplash physics photo | ✅ Displayed |
+| Course Title | Modern Physics Course | ✅ Displayed |
+| Subject | Physics | ✅ Displayed |
+| Class | 12 | ✅ Displayed |
+| Status Badge | 🟢 Active | ✅ Displayed |
+| Progress Bar | 0% (initially) | ✅ Displayed |
+| Price | ₹2999 (discounted) | ✅ Displayed |
+| Original Price | ₹3999 | ✅ Displayed (strikethrough) |
+| Duration | 95 minutes | ✅ Displayed |
+| Rating | ⭐ (empty initially) | ✅ Displayed |
+| Enrollment Date | Dec 12, 2025 | ✅ Displayed |
+| Difficulty | Intermediate | ✅ Displayed |
+
+### What Was Verified
+- Enrolled courses appear immediately after enrollment
+- All course details are correctly retrieved and displayed
+- Course images load properly
+- Progress bar displays 0% initially
+- Status badge shows "active"
+- Pricing information is correct (original and discounted)
+- Course metadata (subject, class, difficulty, duration) displays
+- Enrollment date is recorded and shown
+- Rating and feedback fields present but empty initially
+- Frontend can populate course cards with this data
 
 ---
 

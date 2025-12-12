@@ -10,11 +10,13 @@ import {
   getMyCourses,
   getCoursesByClass
 } from '../controllers/enrollmentController.js';
+import { quickEnroll } from '../controllers/paymentController.js';
 import { authenticateStudent } from '../middleware/auth.js';
 
 const router = express.Router();
 
 // ✅ Enrollment Routes (Auth Required)
+router.post('/quick', authenticateStudent, quickEnroll);               // Direct enroll without gateway
 router.get('/', authenticateStudent, getUserEnrollments);               // Get all enrollments
 router.get('/my-courses', authenticateStudent, getMyCourses);           // Get my enrolled courses with full details (MUST BE BEFORE :enrollmentId route)
 router.get('/:enrollmentId', authenticateStudent, getEnrollmentDetails); // Get enrollment details

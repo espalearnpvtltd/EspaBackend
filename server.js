@@ -10,7 +10,7 @@ import courseRoutes from './routes/courses.js';
 import classRoutes from './routes/classes.js';
 import teacherRoutes from './routes/teachers.js';
 import paymentRoutes from './routes/payments.js';
-import enrollmentRoutes from './routes/enrollments.js';
+import enrollmentQuickRoutes from './routes/enrollments.js';
 import { initializeRedis } from './utils/cache.js';
 
 dotenv.config();
@@ -65,7 +65,7 @@ const startServer = async () => {
     app.use('/api/classes', classRoutes);
     app.use('/api/teachers', teacherRoutes);
     app.use('/api/payments', paymentRoutes);
-    app.use('/api/enrollments', enrollmentRoutes);
+    app.use('/api/enrollments', enrollmentQuickRoutes);
 
     // =====================
     // Start server
