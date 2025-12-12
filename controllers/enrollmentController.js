@@ -5,9 +5,9 @@ import User from '../models/User.js';
 // ✅ Get User Enrollments
 export const getUserEnrollments = async (req, res) => {
   try {
-    const userId = req.student?.userId || req.student?._id;
+    const studentId = req.student?.userId || req.student?._id;
 
-    const enrollments = await Enrollment.find({ userId })
+    const enrollments = await Enrollment.find({ studentId })
       .populate('courseId', 'name subject class difficulty price discountedPrice duration pictures')
       .populate('paymentId', 'amount status transactionId paymentDate')
       .sort({ enrollmentDate: -1 });
@@ -43,9 +43,9 @@ export const getUserEnrollments = async (req, res) => {
 export const getEnrollmentDetails = async (req, res) => {
   try {
     const { enrollmentId } = req.params;
-    const userId = req.student?.userId || req.student?._id;
+    const studentId = req.student?.userId || req.student?._id;
 
-    const enrollment = await Enrollment.findOne({ _id: enrollmentId, userId })
+    const enrollment = await Enrollment.findOne({ _id: enrollmentId, studentId })
       .populate('courseId')
       .populate('paymentId')
       .populate('userId', 'name email class');
@@ -88,13 +88,13 @@ export const updateProgress = async (req, res) => {
   try {
     const { enrollmentId } = req.params;
     const { progress } = req.body;
-    const userId = req.student?.userId || req.student?._id;
+    const studentId = req.student?.userId || req.student?._id;
 
     if (progress < 0 || progress > 100) {
       return res.status(400).json({ message: 'Progress must be between 0 and 100' });
     }
 
-    const enrollment = await Enrollment.findOne({ _id: enrollmentId, userId });
+    const enrollment = await Enrollment.findOne({ _id: enrollmentId, studentId });
     if (!enrollment) {
       return res.status(404).json({ message: 'Enrollment not found' });
     }
@@ -129,13 +129,13 @@ export const rateEnrollment = async (req, res) => {
   try {
     const { enrollmentId } = req.params;
     const { rating, feedback } = req.body;
-    const userId = req.student?.userId || req.student?._id;
+    const studentId = req.student?.userId || req.student?._id;
 
     if (!rating || rating < 1 || rating > 5) {
       return res.status(400).json({ message: 'Rating must be between 1 and 5' });
     }
 
-    const enrollment = await Enrollment.findOne({ _id: enrollmentId, userId });
+    const enrollment = await Enrollment.findOne({ _id: enrollmentId, studentId });
     if (!enrollment) {
       return res.status(404).json({ message: 'Enrollment not found' });
     }
@@ -162,9 +162,9 @@ export const rateEnrollment = async (req, res) => {
 export const pauseEnrollment = async (req, res) => {
   try {
     const { enrollmentId } = req.params;
-    const userId = req.student?.userId || req.student?._id;
+    const studentId = req.student?.userId || req.student?._id;
 
-    const enrollment = await Enrollment.findOne({ _id: enrollmentId, userId });
+    const enrollment = await Enrollment.findOne({ _id: enrollmentId, studentId });
     if (!enrollment) {
       return res.status(404).json({ message: 'Enrollment not found' });
     }
@@ -193,9 +193,9 @@ export const pauseEnrollment = async (req, res) => {
 export const resumeEnrollment = async (req, res) => {
   try {
     const { enrollmentId } = req.params;
-    const userId = req.student?.userId || req.student?._id;
+    const studentId = req.student?.userId || req.student?._id;
 
-    const enrollment = await Enrollment.findOne({ _id: enrollmentId, userId });
+    const enrollment = await Enrollment.findOne({ _id: enrollmentId, studentId });
     if (!enrollment) {
       return res.status(404).json({ message: 'Enrollment not found' });
     }
@@ -224,9 +224,9 @@ export const resumeEnrollment = async (req, res) => {
 export const cancelEnrollment = async (req, res) => {
   try {
     const { enrollmentId } = req.params;
-    const userId = req.student?.userId || req.student?._id;
+    const studentId = req.student?.userId || req.student?._id;
 
-    const enrollment = await Enrollment.findOne({ _id: enrollmentId, userId });
+    const enrollment = await Enrollment.findOne({ _id: enrollmentId, studentId });
     if (!enrollment) {
       return res.status(404).json({ message: 'Enrollment not found' });
     }

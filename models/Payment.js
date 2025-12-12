@@ -1,20 +1,10 @@
 import mongoose from 'mongoose';
 
 const paymentSchema = new mongoose.Schema({
-  userId: {
+  studentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
-  },
-  courseId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Course',
-    required: true
-  },
-  studentId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Student',
-    default: null
   },
   amount: {
     type: Number,

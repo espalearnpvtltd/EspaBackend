@@ -8,10 +8,10 @@ import crypto from 'crypto';
 export const createPaymentOrder = async (req, res) => {
   try {
     const { courseId } = req.body;
-    const userId = req.student?.userId || req.student?._id;
+    const studentId = req.student?.userId || req.student?._id;
 
-    if (!courseId || !userId) {
-      return res.status(400).json({ message: 'Course ID and User ID are required' });
+    if (!courseId || !studentId) {
+      return res.status(400).json({ message: 'Course ID and Student ID are required' });
     }
 
     // Check if course exists and get its price
@@ -20,8 +20,8 @@ export const createPaymentOrder = async (req, res) => {
       return res.status(404).json({ message: 'Course not found' });
     }
 
-    // Check if user already enrolled
-    const existingEnrollment = await Enrollment.findOne({ userId, courseId });
+    // Check if student already enrolled
+    const existingEnrollment = await Enrollment.findOne({ studentId, courseId });
     if (existingEnrollment) {
       return res.status(400).json({ message: 'Already enrolled in this course' });
     }
@@ -31,7 +31,7 @@ export const createPaymentOrder = async (req, res) => {
 
     // Create payment record
     const payment = await Payment.create({
-      userId,
+      studentId,
       courseId,
       amount: course.discountedPrice || course.price,
       currency: 'INR',
@@ -68,7 +68,7 @@ export const createPaymentOrder = async (req, res) => {
 export const verifyPayment = async (req, res) => {
   try {
     const { orderId, transactionId, paymentMethod = 'other' } = req.body;
-    const userId = req.student?.userId || req.student?._id;
+    const studentId = req.student?.userId || req.student?._id;
 
     if (!orderId || !transactionId) {
       return res.status(400).json({ message: 'Order ID and Transaction ID are required' });
@@ -80,8 +80,8 @@ export const verifyPayment = async (req, res) => {
       return res.status(404).json({ message: 'Payment order not found' });
     }
 
-    // Verify user ownership
-    if (payment.userId.toString() !== userId.toString()) {
+    // Verify student ownership
+    if (payment.studentId.toString() !== studentId.toString()) {
       return res.status(403).json({ message: 'Unauthorized payment verification' });
     }
 
@@ -94,16 +94,16 @@ export const verifyPayment = async (req, res) => {
 
     // Create enrollment
     const enrollment = await Enrollment.create({
-      userId: payment.userId,
+      studentId: payment.studentId,
       courseId: payment.courseId,
       paymentId: payment._id,
       enrollmentDate: new Date(),
       status: 'active'
     });
 
-    // Populate enrollment with course and user details
+    // Populate enrollment with course and student details
     await enrollment.populate('courseId', 'name subject class');
-    await enrollment.populate('userId', 'name email class');
+    await enrollment.populate('studentId', 'name email class');
 
     res.status(201).json({
       message: 'Payment verified and enrollment created successfully',
@@ -126,9 +126,9 @@ export const verifyPayment = async (req, res) => {
 // ✅ Get Payment History
 export const getPaymentHistory = async (req, res) => {
   try {
-    const userId = req.student?.userId || req.student?._id;
+    const studentId = req.student?.userId || req.student?._id;
 
-    const payments = await Payment.find({ userId })
+    const payments = await Payment.find({ studentId })
       .populate('courseId', 'name subject class')
       .sort({ createdAt: -1 });
 
@@ -156,11 +156,11 @@ export const getPaymentHistory = async (req, res) => {
 export const getPaymentDetails = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const userId = req.student?.userId || req.student?._id;
+    const studentId = req.student?.userId || req.student?._id;
 
-    const payment = await Payment.findOne({ orderId, userId })
+    const payment = await Payment.findOne({ orderId, studentId })
       .populate('courseId')
-      .populate('userId', 'name email class');
+      .populate('studentId', 'name email class');
 
     if (!payment) {
       return res.status(404).json({ message: 'Payment not found' });
@@ -191,9 +191,9 @@ export const getPaymentDetails = async (req, res) => {
 export const refundPayment = async (req, res) => {
   try {
     const { orderId } = req.params;
-    const userId = req.student?.userId || req.student?._id;
+    const studentId = req.student?.userId || req.student?._id;
 
-    const payment = await Payment.findOne({ orderId, userId });
+    const payment = await Payment.findOne({ orderId, studentId });
     if (!payment) {
       return res.status(404).json({ message: 'Payment not found' });
     }
@@ -234,19 +234,19 @@ export const refundPayment = async (req, res) => {
 export const quickEnroll = async (req, res) => {
   try {
     const { courseId } = req.body;
-    const userId = req.student?.userId || req.student?._id;
+    const studentId = req.student?.userId || req.student?._id;
 
-    if (!courseId || !userId) {
-      return res.status(400).json({ message: 'Course ID and User ID are required' });
+    if (!courseId || !studentId) {
+      return res.status(400).json({ message: 'Course ID and Student ID are required' });
     }
 
-    // Get user and check if they are a student
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    // Get student and verify they have student role
+    const student = await User.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ message: 'Student not found' });
     }
 
-    if (user.role !== 'student') {
+    if (student.role !== 'student') {
       return res.status(403).json({ message: 'Only students can enroll in courses' });
     }
 
@@ -257,14 +257,14 @@ export const quickEnroll = async (req, res) => {
     }
 
     // 2️⃣ Check if already enrolled
-    const existingEnrollment = await Enrollment.findOne({ userId, courseId });
+    const existingEnrollment = await Enrollment.findOne({ studentId, courseId });
     if (existingEnrollment) {
       return res.status(400).json({ message: 'Already enrolled in this course' });
     }
 
     // 3️⃣ Directly enroll student (NO PAYMENT REQUIRED - Payment Gateway Not Active)
     const enrollment = await Enrollment.create({
-      userId,
+      studentId,
       courseId,
       status: 'active',
       progress: 0,
@@ -275,8 +275,8 @@ export const quickEnroll = async (req, res) => {
       message: 'Enrollment successful! You are now enrolled in this course.',
       enrollment: {
         enrollmentId: enrollment._id,
-        studentName: user.name,
-        studentEmail: user.email,
+        studentName: student.name,
+        studentEmail: student.email,
         courseName: course.name,
         courseClass: course.class,
         subject: course.subject,

@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 const enrollmentSchema = new mongoose.Schema({
-  userId: {
+  studentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
@@ -57,12 +57,12 @@ const enrollmentSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Indexes for optimized queries
-enrollmentSchema.index({ userId: 1, courseId: 1 }, { unique: true }); // One enrollment per user-course pair
-enrollmentSchema.index({ userId: 1 });
+enrollmentSchema.index({ studentId: 1, courseId: 1 }, { unique: true }); // One enrollment per student-course pair
+enrollmentSchema.index({ studentId: 1 });
 enrollmentSchema.index({ courseId: 1 });
 enrollmentSchema.index({ paymentId: 1 });
 enrollmentSchema.index({ status: 1 });
 enrollmentSchema.index({ enrollmentDate: -1 });
-enrollmentSchema.index({ userId: 1, status: 1 });
+enrollmentSchema.index({ studentId: 1, status: 1 });
 
 export default mongoose.model('Enrollment', enrollmentSchema);
