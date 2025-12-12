@@ -253,10 +253,22 @@ Headers: Authorization: Bearer YOUR_SAVED_TOKEN
 
 ## 🚀 You're Ready!
 
+### Option 1: Use Postman (for API testing)
 Import the Postman collection and start testing:
 1. Register → Get token
 2. Search courses
 3. Enroll with payment
 4. Manage your courses
+
+### Option 2: Use Your Courses Page (for student interface)
+Access the dedicated student portal:
+- **URL:** `http://localhost:5001/my-courses.html`
+- Features:
+  - 🔐 Login / Register directly
+  - 📚 View all your enrolled courses
+  - 📊 Track progress with visual bars
+  - ⭐ Rate and review courses
+  - 📈 See course stats (enrolled, active, completed)
+  - 🎯 Beautiful responsive design
 
 Happy Learning! 🎉
