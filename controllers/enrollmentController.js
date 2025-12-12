@@ -247,25 +247,6 @@ export const cancelEnrollment = async (req, res) => {
   }
 };
 
-// ✅ Get Courses by Class (For Enrollment)
-export const getCoursesByClass = async (req, res) => {
-  try {
-    const { classLevel } = req.params;
-
-    const courses = await Course.find({ class: classLevel, isRecommended: true })
-      .select('name subject class difficulty price discountedPrice duration pictures');
-
-    res.status(200).json({
-      message: `Courses for class ${classLevel}`,
-      count: courses.length,
-      courses
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error fetching courses', error: error.message });
-  }
-};
-
 // ✅ Get My Courses (Enrolled Courses with Full Details)
 export const getMyCourses = async (req, res) => {
   try {
