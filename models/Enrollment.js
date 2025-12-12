@@ -14,7 +14,8 @@ const enrollmentSchema = new mongoose.Schema({
   paymentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Payment',
-    required: true
+    required: false,
+    default: null
   },
   enrollmentDate: {
     type: Date,

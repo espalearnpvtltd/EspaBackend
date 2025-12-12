@@ -230,6 +230,70 @@ export const refundPayment = async (req, res) => {
   }
 };
 
+// ✅ ONE-CLICK ENROLLMENT: Direct Enrollment (No Payment Gateway Required - STUDENTS ONLY)
+export const quickEnroll = async (req, res) => {
+  try {
+    const { courseId } = req.body;
+    const userId = req.student?.userId || req.student?._id;
+
+    if (!courseId || !userId) {
+      return res.status(400).json({ message: 'Course ID and User ID are required' });
+    }
+
+    // Get user and check if they are a student
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (user.role !== 'student') {
+      return res.status(403).json({ message: 'Only students can enroll in courses' });
+    }
+
+    // 1️⃣ Check if course exists
+    const course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
+
+    // 2️⃣ Check if already enrolled
+    const existingEnrollment = await Enrollment.findOne({ userId, courseId });
+    if (existingEnrollment) {
+      return res.status(400).json({ message: 'Already enrolled in this course' });
+    }
+
+    // 3️⃣ Directly enroll student (NO PAYMENT REQUIRED - Payment Gateway Not Active)
+    const enrollment = await Enrollment.create({
+      userId,
+      courseId,
+      status: 'active',
+      progress: 0,
+      enrollmentDate: new Date()
+    });
+
+    res.status(201).json({
+      message: 'Enrollment successful! You are now enrolled in this course.',
+      enrollment: {
+        enrollmentId: enrollment._id,
+        studentName: user.name,
+        studentEmail: user.email,
+        courseName: course.name,
+        courseClass: course.class,
+        subject: course.subject,
+        price: course.price,
+        discountedPrice: course.discountedPrice || course.price,
+        status: enrollment.status,
+        progress: enrollment.progress,
+        enrollmentDate: enrollment.enrollmentDate,
+        startDate: new Date()
+      }
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Enrollment failed', error: error.message });
+  }
+};
+
 // ✅ Legacy: Create Payment (kept for backward compatibility)
 export const createPayment = async (req, res) => {
   try {

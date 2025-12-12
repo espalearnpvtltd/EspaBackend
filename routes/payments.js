@@ -6,6 +6,7 @@ import {
   getPaymentHistory,
   getPaymentDetails,
   refundPayment,
+  quickEnroll,
   createPayment,
   getAllPayments,
   getPayment,
@@ -17,6 +18,7 @@ import { verifySecretKey, authenticateStudent } from '../middleware/auth.js';
 const router = express.Router();
 
 // ✅ NEW Payment Routes (Auth Required - Course Enrollment)
+router.post('/enroll', authenticateStudent, quickEnroll);               // ⭐ ONE-CLICK ENROLLMENT
 router.post('/order', authenticateStudent, createPaymentOrder);        // Create payment order
 router.post('/verify', authenticateStudent, verifyPayment);             // Verify payment & create enrollment
 router.get('/history', authenticateStudent, getPaymentHistory);         // Get user's payment history
