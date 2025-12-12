@@ -1,30 +1,26 @@
 {
   "info": {
-    "name": "EspaBackend API",
-    "description": "Complete API collection for EspaBackend with JWT authentication",
+    "name": "EspaBackend - Complete API Collection",
+    "description": "Full API testing collection for course management, authentication, enrollment, and payments",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "User Authentication",
+      "name": "🔐 Authentication",
       "item": [
         {
-          "name": "Register User",
+          "name": "Register Student (Nursery)",
           "request": {
             "method": "POST",
             "header": [
               {
                 "key": "Content-Type",
                 "value": "application/json"
-              },
-              {
-                "key": "x-secret-key",
-                "value": "espa_admin_secret_key_2025_secure"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\",\n  \"phone\": \"9876543210\",\n  \"parentsName\": \"Jane Doe\",\n  \"parentsPhone\": \"9876543211\",\n  \"parentEmail\": \"jane@example.com\",\n  \"address\": \"123 Main St\",\n  \"city\": \"New York\",\n  \"state\": \"NY\",\n  \"zipCode\": \"10001\",\n  \"dateOfBirth\": \"1990-01-15\",\n  \"gender\": \"Male\",\n  \"role\": \"user\",\n  \"status\": \"active\"\n}"
+              "raw": "{\n  \"name\": \"Nursery Student\",\n  \"email\": \"nursery{{$timestamp}}@example.com\",\n  \"password\": \"SecurePass123\",\n  \"class\": \"Nursery\"\n}"
             },
             "url": {
               "raw": "http://localhost:5001/api/auth/register",
@@ -36,7 +32,7 @@
           }
         },
         {
-          "name": "Login User",
+          "name": "Register Student (Class 5)",
           "request": {
             "method": "POST",
             "header": [
@@ -47,7 +43,53 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"john@example.com\",\n  \"password\": \"password123\"\n}"
+              "raw": "{\n  \"name\": \"Class 5 Student\",\n  \"email\": \"class5{{$timestamp}}@example.com\",\n  \"password\": \"SecurePass123\",\n  \"class\": \"5\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5001/api/auth/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5001",
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Register Student (Class 12)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Class 12 Student\",\n  \"email\": \"class12{{$timestamp}}@example.com\",\n  \"password\": \"SecurePass123\",\n  \"class\": \"12\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5001/api/auth/register",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5001",
+              "path": ["api", "auth", "register"]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"test@example.com\",\n  \"password\": \"SecurePass123\"\n}"
             },
             "url": {
               "raw": "http://localhost:5001/api/auth/login",
@@ -57,323 +99,14 @@
               "path": ["api", "auth", "login"]
             }
           }
-        },
-        {
-          "name": "Refresh Access Token",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"refreshToken\": \"YOUR_REFRESH_TOKEN_HERE\"\n}"
-            },
-            "url": {
-              "raw": "http://localhost:5001/api/auth/refresh",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5001",
-              "path": ["api", "auth", "refresh"]
-            }
-          }
-        },
-        {
-          "name": "Logout User",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer YOUR_ACCESS_TOKEN_HERE"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:5001/api/auth/logout",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5001",
-              "path": ["api", "auth", "logout"]
-            }
-          }
         }
       ]
     },
     {
-      "name": "Student Authentication",
+      "name": "📚 Courses",
       "item": [
         {
-          "name": "Register Student",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "x-secret-key",
-                "value": "espa_admin_secret_key_2025_secure"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Alice Johnson\",\n  \"email\": \"alice@example.com\",\n  \"password\": \"student123\",\n  \"class\": \"10A\",\n  \"parentsName\": \"Robert Johnson\",\n  \"parentsPhone\": \"9876543212\",\n  \"status\": \"active\"\n}"
-            },
-            "url": {
-              "raw": "http://localhost:5001/api/student-auth/register",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5001",
-              "path": ["api", "student-auth", "register"]
-            }
-          }
-        },
-        {
-          "name": "Login Student",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"email\": \"alice@example.com\",\n  \"password\": \"student123\"\n}"
-            },
-            "url": {
-              "raw": "http://localhost:5001/api/student-auth/login",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5001",
-              "path": ["api", "student-auth", "login"]
-            }
-          }
-        },
-        {
-          "name": "Refresh Student Token",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"refreshToken\": \"YOUR_STUDENT_REFRESH_TOKEN_HERE\"\n}"
-            },
-            "url": {
-              "raw": "http://localhost:5001/api/student-auth/refresh",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5001",
-              "path": ["api", "student-auth", "refresh"]
-            }
-          }
-        },
-        {
-          "name": "Logout Student",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer YOUR_STUDENT_ACCESS_TOKEN_HERE"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:5001/api/student-auth/logout",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5001",
-              "path": ["api", "student-auth", "logout"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Student Management",
-      "item": [
-        {
-          "name": "Create Student",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "x-secret-key",
-                "value": "espa_admin_secret_key_2025_secure"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Bob Smith\",\n  \"email\": \"bob@example.com\",\n  \"password\": \"bob123\",\n  \"class\": \"9B\",\n  \"parentsName\": \"Mary Smith\",\n  \"parentsPhone\": \"9876543213\",\n  \"status\": \"active\"\n}"
-            },
-            "url": {
-              "raw": "http://localhost:5001/api/students",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5001",
-              "path": ["api", "students"]
-            }
-          }
-        },
-        {
-          "name": "Get All Students",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer YOUR_ACCESS_TOKEN_HERE"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:5001/api/students",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5001",
-              "path": ["api", "students"]
-            }
-          }
-        },
-        {
-          "name": "Get Student by ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer YOUR_ACCESS_TOKEN_HERE"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:5001/api/students/STUDENT_ID",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5001",
-              "path": ["api", "students", "STUDENT_ID"]
-            }
-          }
-        },
-        {
-          "name": "Update Student",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer YOUR_ACCESS_TOKEN_HERE"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Bob Smith Updated\",\n  \"class\": \"10B\",\n  \"status\": \"active\"\n}"
-            },
-            "url": {
-              "raw": "http://localhost:5001/api/students/STUDENT_ID",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5001",
-              "path": ["api", "students", "STUDENT_ID"]
-            }
-          }
-        },
-        {
-          "name": "Delete Student",
-          "request": {
-            "method": "DELETE",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer YOUR_ACCESS_TOKEN_HERE"
-              }
-            ],
-            "url": {
-              "raw": "http://localhost:5001/api/students/STUDENT_ID",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5001",
-              "path": ["api", "students", "STUDENT_ID"]
-            }
-          }
-        },
-        {
-          "name": "Mark Attendance",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer YOUR_ACCESS_TOKEN_HERE"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"date\": \"2025-12-10\",\n  \"status\": \"present\"\n}"
-            },
-            "url": {
-              "raw": "http://localhost:5001/api/students/STUDENT_ID/attendance",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5001",
-              "path": ["api", "students", "STUDENT_ID", "attendance"]
-            }
-          }
-        }
-      ]
-    },
-    {
-      "name": "Courses",
-      "item": [
-        {
-          "name": "Create Course",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "x-secret-key",
-                "value": "espa_admin_secret_key_2025_secure"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Mathematics 101\",\n  \"description\": \"Basic mathematics course\",\n  \"subject\": \"Mathematics\",\n  \"teacherId\": \"TEACHER_USER_ID\",\n  \"filepath\": \"/courses/math101\",\n  \"classId\": \"CLASS_ID\"\n}"
-            },
-            "url": {
-              "raw": "http://localhost:5001/api/courses",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5001",
-              "path": ["api", "courses"]
-            }
-          }
-        },
-        {
-          "name": "Get All Courses",
+          "name": "Get All Courses (Public)",
           "request": {
             "method": "GET",
             "header": [],
@@ -387,63 +120,76 @@
           }
         },
         {
-          "name": "Get Course by ID",
+          "name": "Search Courses - Physics",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:5001/api/courses/COURSE_ID",
+              "raw": "http://localhost:5001/api/courses/search/courses?query=physics",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5001",
-              "path": ["api", "courses", "COURSE_ID"]
+              "path": ["api", "courses", "search", "courses"],
+              "query": [{"key": "query", "value": "physics"}]
             }
           }
         },
         {
-          "name": "Update Course",
+          "name": "Search Courses - Class 5",
           "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Advanced Mathematics\",\n  \"description\": \"Advanced math course\",\n  \"subject\": \"Mathematics\",\n  \"filepath\": \"/courses/math201\"\n}"
-            },
-            "url": {
-              "raw": "http://localhost:5001/api/courses/COURSE_ID",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5001",
-              "path": ["api", "courses", "COURSE_ID"]
-            }
-          }
-        },
-        {
-          "name": "Delete Course",
-          "request": {
-            "method": "DELETE",
+            "method": "GET",
             "header": [],
             "url": {
-              "raw": "http://localhost:5001/api/courses/COURSE_ID",
+              "raw": "http://localhost:5001/api/courses/search/courses?query=class%205",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5001",
-              "path": ["api", "courses", "COURSE_ID"]
+              "path": ["api", "courses", "search", "courses"],
+              "query": [{"key": "query", "value": "class 5"}]
             }
           }
-        }
-      ]
-    },
-    {
-      "name": "Classes",
-      "item": [
+        },
         {
-          "name": "Create Class",
+          "name": "Get Recommended Courses",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_TOKEN_HERE"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5001/api/courses/recommended/by-class",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5001",
+              "path": ["api", "courses", "recommended", "by-class"]
+            }
+          }
+        },
+        {
+          "name": "Search in Recommended",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_TOKEN_HERE"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5001/api/courses/recommended/by-class?search=mathematics",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5001",
+              "path": ["api", "courses", "recommended", "by-class"],
+              "query": [{"key": "search", "value": "mathematics"}]
+            }
+          }
+        },
+        {
+          "name": "Create Course (Admin)",
           "request": {
             "method": "POST",
             "header": [
@@ -458,119 +204,296 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Class 10A\"\n}"
+              "raw": "{\n  \"name\": \"Advanced Mathematics\",\n  \"description\": \"Complete mathematics course for Class 5\",\n  \"subject\": \"Mathematics\",\n  \"class\": \"5\",\n  \"difficulty\": \"intermediate\",\n  \"price\": 2999,\n  \"discountedPrice\": 1999,\n  \"duration\": 60,\n  \"isRecommended\": true\n}"
             },
             "url": {
-              "raw": "http://localhost:5001/api/classes",
+              "raw": "http://localhost:5001/api/courses",
               "protocol": "http",
               "host": ["localhost"],
               "port": "5001",
-              "path": ["api", "classes"]
-            }
-          }
-        },
-        {
-          "name": "Get All Classes",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:5001/api/classes",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5001",
-              "path": ["api", "classes"]
-            }
-          }
-        },
-        {
-          "name": "Get Class by ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:5001/api/classes/CLASS_ID",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5001",
-              "path": ["api", "classes", "CLASS_ID"]
-            }
-          }
-        },
-        {
-          "name": "Update Class",
-          "request": {
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Class 10B\"\n}"
-            },
-            "url": {
-              "raw": "http://localhost:5001/api/classes/CLASS_ID",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5001",
-              "path": ["api", "classes", "CLASS_ID"]
-            }
-          }
-        },
-        {
-          "name": "Delete Class",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "http://localhost:5001/api/classes/CLASS_ID",
-              "protocol": "http",
-              "host": ["localhost"],
-              "port": "5001",
-              "path": ["api", "classes", "CLASS_ID"]
+              "path": ["api", "courses"]
             }
           }
         }
       ]
     },
     {
-      "name": "Health Check",
-      "request": {
-        "method": "GET",
-        "header": [],
-        "url": {
-          "raw": "http://localhost:5001/",
-          "protocol": "http",
-          "host": ["localhost"],
-          "port": "5001",
-          "path": ["/"]
+      "name": "💳 Payments & Enrollment",
+      "item": [
+        {
+          "name": "Step 1: Create Payment Order",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_TOKEN_HERE"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseId\": \"693ab05e31318b0db26d7147\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5001/api/payments/order",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5001",
+              "path": ["api", "payments", "order"]
+            }
+          }
+        },
+        {
+          "name": "Step 2: Verify Payment & Enroll",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_TOKEN_HERE"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"orderId\": \"ORD_1765524953945_f985b83a\",\n  \"transactionId\": \"TXN_1765524960123\",\n  \"paymentMethod\": \"upi\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5001/api/payments/verify",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5001",
+              "path": ["api", "payments", "verify"]
+            }
+          }
+        },
+        {
+          "name": "Get Payment History",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_TOKEN_HERE"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5001/api/payments/history",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5001",
+              "path": ["api", "payments", "history"]
+            }
+          }
+        },
+        {
+          "name": "Refund Payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_TOKEN_HERE"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5001/api/payments/ORD_ID_HERE/refund",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5001",
+              "path": ["api", "payments", "ORD_ID_HERE", "refund"]
+            }
+          }
         }
-      }
-    }
-  ],
-  "variable": [
-    {
-      "key": "base_url",
-      "value": "http://localhost:5001",
-      "type": "string"
+      ]
     },
     {
-      "key": "access_token",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "refresh_token",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "secret_key",
-      "value": "espa_admin_secret_key_2025_secure",
-      "type": "string"
+      "name": "🎓 Enrollments",
+      "item": [
+        {
+          "name": "Get All Enrollments",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_TOKEN_HERE"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5001/api/enrollments",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5001",
+              "path": ["api", "enrollments"]
+            }
+          }
+        },
+        {
+          "name": "Get Enrollment Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_TOKEN_HERE"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5001/api/enrollments/ENROLLMENT_ID_HERE",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5001",
+              "path": ["api", "enrollments", "ENROLLMENT_ID_HERE"]
+            }
+          }
+        },
+        {
+          "name": "Update Progress (25%)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_TOKEN_HERE"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"progress\": 25\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5001/api/enrollments/ENROLLMENT_ID_HERE/progress",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5001",
+              "path": ["api", "enrollments", "ENROLLMENT_ID_HERE", "progress"]
+            }
+          }
+        },
+        {
+          "name": "Update Progress (100% Complete)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_TOKEN_HERE"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"progress\": 100\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5001/api/enrollments/ENROLLMENT_ID_HERE/progress",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5001",
+              "path": ["api", "enrollments", "ENROLLMENT_ID_HERE", "progress"]
+            }
+          }
+        },
+        {
+          "name": "Rate Course",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_TOKEN_HERE"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": 5,\n  \"feedback\": \"Excellent course!\"\n}"
+            },
+            "url": {
+              "raw": "http://localhost:5001/api/enrollments/ENROLLMENT_ID_HERE/rate",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5001",
+              "path": ["api", "enrollments", "ENROLLMENT_ID_HERE", "rate"]
+            }
+          }
+        },
+        {
+          "name": "Pause Course",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_TOKEN_HERE"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5001/api/enrollments/ENROLLMENT_ID_HERE/pause",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5001",
+              "path": ["api", "enrollments", "ENROLLMENT_ID_HERE", "pause"]
+            }
+          }
+        },
+        {
+          "name": "Resume Course",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_TOKEN_HERE"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5001/api/enrollments/ENROLLMENT_ID_HERE/resume",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5001",
+              "path": ["api", "enrollments", "ENROLLMENT_ID_HERE", "resume"]
+            }
+          }
+        },
+        {
+          "name": "Cancel Enrollment",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer YOUR_TOKEN_HERE"
+              }
+            ],
+            "url": {
+              "raw": "http://localhost:5001/api/enrollments/ENROLLMENT_ID_HERE/cancel",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "5001",
+              "path": ["api", "enrollments", "ENROLLMENT_ID_HERE", "cancel"]
+            }
+          }
+        }
+      ]
     }
   ]
 }
