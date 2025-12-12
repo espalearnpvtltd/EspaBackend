@@ -36,7 +36,7 @@ export const registerUser = async (req, res) => {
       name,
       email,
       password,
-      role: role || 'teacher',
+      role: role || 'student',
       class: userClass || '10',
       phone,
       parentsName,
