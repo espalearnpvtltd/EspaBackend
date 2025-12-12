@@ -155,6 +155,7 @@ export const getRecommendedByClass = async (req, res) => {
   try {
     // Get student class from query parameter OR from authenticated user
     let studentClass = req.query.class;
+    const searchQuery = req.query.search; // Optional search by title/description
     
     if (!studentClass) {
       const student = req.student;
@@ -164,13 +165,27 @@ export const getRecommendedByClass = async (req, res) => {
       studentClass = student.class;
     }
     
-    // Return ALL courses for the class (not just recommended)
-    const courses = await Course.find({ 
-      class: studentClass
-    }).populate('teacherId', 'name email').sort({ 'ratings.average': -1 });
+    // Build filter object
+    const filter = { class: studentClass };
+
+    // Add search filter if provided (searches in name, title, subject, description)
+    if (searchQuery && searchQuery.trim().length > 0) {
+      const searchRegex = new RegExp(searchQuery, 'i');
+      filter.$or = [
+        { title: { $regex: searchRegex } },
+        { name: { $regex: searchRegex } },
+        { subject: { $regex: searchRegex } },
+        { description: { $regex: searchRegex } }
+      ];
+    }
+
+    // Return ALL courses for the class (optionally filtered by search)
+    const courses = await Course.find(filter)
+      .populate('teacherId', 'name email')
+      .sort({ 'ratings.average': -1 });
 
     res.status(200).json({ 
-      message: `All courses for class ${studentClass}`,
+      message: `All courses for class ${studentClass}${searchQuery ? ` matching "${searchQuery}"` : ''}`,
       studentClass,
       count: courses.length,
       courses 

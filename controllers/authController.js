@@ -16,7 +16,7 @@ const generateRefreshToken = (id, role) =>
 export const registerUser = async (req, res) => {
   try {
     const { 
-      name, email, password, role, phone, parentsName, parentsPhone, parentEmail,
+      name, email, password, role, class: userClass, phone, parentsName, parentsPhone, parentEmail,
       address, city, state, zipCode, dateOfBirth, gender, profileImage 
     } = req.body;
 
@@ -37,6 +37,7 @@ export const registerUser = async (req, res) => {
       email,
       password,
       role: role || 'teacher',
+      class: userClass || '10',
       phone,
       parentsName,
       parentsPhone,
@@ -68,6 +69,7 @@ export const registerUser = async (req, res) => {
         email: user.email,
         phone: user.phone,
         role: user.role,
+        class: user.class,
         parentsName: user.parentsName,
         parentsPhone: user.parentsPhone,
         parentEmail: user.parentEmail,
