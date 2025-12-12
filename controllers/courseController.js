@@ -155,7 +155,7 @@ export const getRecommendedByClass = async (req, res) => {
   try {
     // Get student class from query parameter OR from authenticated user
     let studentClass = req.query.class;
-    const searchQuery = req.query.search; // Optional search by title/description
+    const searchQuery = req.query.search; // Optional search by title/description/class
     
     if (!studentClass) {
       const student = req.student;
@@ -168,15 +168,30 @@ export const getRecommendedByClass = async (req, res) => {
     // Build filter object
     const filter = { class: studentClass };
 
-    // Add search filter if provided (searches in name, title, subject, description)
+    // Add search filter if provided (searches in name, title, subject, description, class)
     if (searchQuery && searchQuery.trim().length > 0) {
       const searchRegex = new RegExp(searchQuery, 'i');
-      filter.$or = [
+      
+      // Extract class number if user searches for "class 11", "class 12", "11", "12"
+      let extractedClass = null;
+      const classMatch = searchQuery.match(/(?:class\s*)?(\d+)/i);
+      if (classMatch) {
+        extractedClass = classMatch[1]; // Extract just the number (11, 12, etc)
+      }
+
+      const orConditions = [
         { title: { $regex: searchRegex } },
         { name: { $regex: searchRegex } },
         { subject: { $regex: searchRegex } },
         { description: { $regex: searchRegex } }
       ];
+
+      // If user searched for class, also match by class field
+      if (extractedClass) {
+        orConditions.push({ class: extractedClass });
+      }
+
+      filter.$or = orConditions;
     }
 
     // Return ALL courses for the class (optionally filtered by search)
@@ -358,6 +373,13 @@ export const searchCourses = async (req, res) => {
     // Create regex for case-insensitive search
     const searchRegex = new RegExp(query, 'i');
 
+    // Extract class number if user searches for "class 11", "class 12", "11", "12"
+    let extractedClass = null;
+    const classMatch = query.match(/(?:class\s*)?(\d+)/i);
+    if (classMatch) {
+      extractedClass = classMatch[1]; // Extract just the number (11, 12, etc)
+    }
+
     // Build filter object - search in title, name, subject, description, and class
     const filter = {
       $and: [
@@ -372,6 +394,11 @@ export const searchCourses = async (req, res) => {
         }
       ]
     };
+
+    // If user searched for class (e.g., "class 11" or "11"), also match by class directly
+    if (extractedClass) {
+      filter.$and[0].$or.push({ class: extractedClass });
+    }
 
     // Add class filter if provided (narrows down results to specific class)
     if (courseClass) {
