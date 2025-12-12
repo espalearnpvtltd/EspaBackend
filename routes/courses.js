@@ -32,6 +32,12 @@ router.get('/search/courses', searchCourses);
 // Student/User - Get recommended courses with dynamic categories (JWT required)
 router.get('/recommended/categories', authenticateStudent, getRecommendedCategories);
 
+// Student/User - Get recommended courses (JWT required)
+router.get('/recommended/by-class', authenticateStudent, getRecommendedByClass);
+
+// Student/User - Get filtered courses (JWT required)
+router.get('/filter/all', authenticateStudent, getFilteredCourses);
+
 // Student/User - Get course details with ratings (JWT required)
 router.get('/:id/details', authenticateStudent, getCourseWithRatings);
 
@@ -41,16 +47,7 @@ router.get('/:id', authenticateStudent, getCourse);
 // Student/User - Add rating (JWT required)
 router.post('/:id/rating', authenticateStudent, addRating);
 
-// Student/User - Get recommended courses (JWT required)
-router.get('/recommended/by-class', authenticateStudent, getRecommendedByClass);
-
-// Student/User - Get filtered courses (JWT required)
-router.get('/filter/all', authenticateStudent, getFilteredCourses);
-
 // Student/User - Get courses by stream (JWT required)
-router.get('/stream/:stream', authenticateStudent, getCoursesByStream);
 
-// Student/User - Get courses by exam (JWT required)
-router.get('/exam/:exam', authenticateStudent, getCoursesByExam);
 
 export default router;

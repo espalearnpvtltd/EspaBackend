@@ -150,25 +150,29 @@ export const getCourseWithRatings = async (req, res) => {
   }
 };
 
-// ✅ Get Recommended Courses by Class (from JWT token)
+// ✅ Get Recommended Courses by Class (from JWT token or query parameter)
 export const getRecommendedByClass = async (req, res) => {
   try {
-    // Get student class from authenticated user
-    const student = req.student;
-    if (!student || !student.class) {
-      return res.status(400).json({ message: 'Student class not found in token' });
+    // Get student class from query parameter OR from authenticated user
+    let studentClass = req.query.class;
+    
+    if (!studentClass) {
+      const student = req.student;
+      if (!student || !student.class) {
+        return res.status(400).json({ message: 'Student class not found in token or query parameter' });
+      }
+      studentClass = student.class;
     }
-
-    const studentClass = student.class;
     
     const courses = await Course.find({ 
       class: studentClass,
       isRecommended: true 
-    }).populate('teacherId', 'name email');
+    }).populate('teacherId', 'name email').sort({ 'ratings.average': -1 });
 
     res.status(200).json({ 
       message: `Recommended courses for class ${studentClass}`,
       studentClass,
+      count: courses.length,
       courses 
     });
   } catch (error) {
@@ -200,21 +204,23 @@ export const getCoursesByStream = async (req, res) => {
   }
 };
 
-// ✅ Get Courses by Exam Type (JEE, NEET, UPSC)
+// ✅ Get Courses by Subject (Physics, Chemistry, Biology, etc.)
 export const getCoursesByExam = async (req, res) => {
   try {
-    const { exam, class: studentClass } = req.query;
-    if (!exam) {
-      return res.status(400).json({ message: 'Exam parameter required' });
+    const { subject, class: studentClass } = req.query;
+    if (!subject) {
+      return res.status(400).json({ message: 'Subject parameter required' });
     }
 
-    let query = { examType: exam };
+    let query = { subject: subject };
     if (studentClass) query.class = studentClass;
 
-    const courses = await Course.find(query).populate('teacherId', 'name email');
+    const courses = await Course.find(query).populate('teacherId', 'name email').sort({ 'ratings.average': -1 });
 
     res.status(200).json({ 
-      message: `Courses for ${exam} exam preparation`,
+      message: `Courses for ${subject}`,
+      subject,
+      count: courses.length,
       courses 
     });
   } catch (error) {
@@ -223,15 +229,15 @@ export const getCoursesByExam = async (req, res) => {
   }
 };
 
-// ✅ Get Filtered Courses (Class + Stream + Exam)
+// ✅ Get Filtered Courses (Class + Subject + Difficulty)
 export const getFilteredCourses = async (req, res) => {
   try {
-    const { class: studentClass, stream, exam } = req.query;
+    const { class: studentClass, subject, difficulty } = req.query;
     let query = {};
 
     if (studentClass) query.class = studentClass;
-    if (stream) query.stream = stream;
-    if (exam) query.examType = exam;
+    if (subject) query.subject = subject;
+    if (difficulty) query.difficulty = difficulty;
 
     const courses = await Course.find(query)
       .populate('teacherId', 'name email')
@@ -239,6 +245,8 @@ export const getFilteredCourses = async (req, res) => {
 
     res.status(200).json({ 
       message: 'Filtered courses',
+      filters: { class: studentClass, subject, difficulty },
+      count: courses.length,
       courses 
     });
   } catch (error) {
@@ -248,39 +256,49 @@ export const getFilteredCourses = async (req, res) => {
 };
 
 // ✅ Get Dynamic Recommended Categories Based on Student Class
-// This returns different categories based on student's class from JWT
+// This returns different categories based on student's class from JWT or query parameter
 export const getRecommendedCategories = async (req, res) => {
   try {
-    const student = req.student;
-    if (!student || !student.class) {
-      return res.status(400).json({ message: 'Student class not found in token' });
+    // Get student class from query parameter OR from authenticated user
+    let studentClass = req.query.class;
+    
+    if (!studentClass) {
+      const student = req.student;
+      if (!student || !student.class) {
+        return res.status(400).json({ message: 'Student class not found in token or query parameter' });
+      }
+      studentClass = student.class;
     }
 
-    const studentClass = student.class;
     let categories = {};
 
-    // Define categories based on class
+    // Define categories based on class (using subject instead of stream)
     const classCategoryMap = {
       '10': {
-        'Science': { stream: 'science', examType: null },
-        'Commerce': { stream: 'commerce', examType: null },
-        'Arts': { stream: 'arts', examType: null }
+        'Science': { subject: 'Science' },
+        'Commerce': { subject: 'Commerce' },
+        'Arts': { subject: 'Arts' }
       },
       '11': {
-        'Science': { stream: 'science', examType: null },
-        'Medical': { stream: 'science', examType: 'NEET' },
-        'Non-Medical': { stream: 'science', examType: 'JEE' },
-        'Commerce': { stream: 'commerce', examType: null },
-        'Arts': { stream: 'arts', examType: null }
+        'Science': { subject: 'Science' },
+        'Biology': { subject: 'Biology' },
+        'Physics': { subject: 'Physics' },
+        'Commerce': { subject: 'Commerce' },
+        'Arts': { subject: 'Arts' }
       },
       '12': {
-        'Science': { stream: 'science', examType: null },
-        'Medical': { stream: 'science', examType: 'NEET' },
-        'Non-Medical': { stream: 'science', examType: 'JEE' },
-        'Commerce': { stream: 'commerce', examType: null },
-        'Arts': { stream: 'arts', examType: null },
-        'UPSC/Polity': { stream: 'arts', examType: 'UPSC' },
-        'Engineering': { examType: 'GATE' }
+        'Science': { subject: 'Science' },
+        'Physics': { subject: 'Physics' },
+        'Chemistry': { subject: 'Chemistry' },
+        'Biology': { subject: 'Biology' },
+        'Mathematics': { subject: 'Mathematics' },
+        'Commerce': { subject: 'Commerce' },
+        'Accountancy': { subject: 'Accountancy' },
+        'Economics': { subject: 'Economics' },
+        'Arts': { subject: 'Arts' },
+        'History': { subject: 'History' },
+        'Geography': { subject: 'Geography' },
+        'English': { subject: 'English' }
       }
     };
 
@@ -290,11 +308,8 @@ export const getRecommendedCategories = async (req, res) => {
     for (const [categoryName, categoryFilter] of Object.entries(categoryMap)) {
       let query = { class: studentClass, isRecommended: true };
 
-      if (categoryFilter.stream) {
-        query.stream = categoryFilter.stream;
-      }
-      if (categoryFilter.examType) {
-        query.examType = categoryFilter.examType;
+      if (categoryFilter.subject) {
+        query.subject = categoryFilter.subject;
       }
 
       const courses = await Course.find(query)
