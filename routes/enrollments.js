@@ -16,7 +16,7 @@ const router = express.Router();
 
 // ✅ Enrollment Routes (Auth Required)
 router.get('/', authenticateStudent, getUserEnrollments);               // Get all enrollments
-router.get('/my-courses', authenticateStudent, getMyCourses);           // Get my enrolled courses with full details
+router.get('/my-courses', authenticateStudent, getMyCourses);           // Get my enrolled courses with full details (MUST BE BEFORE :enrollmentId route)
 router.get('/:enrollmentId', authenticateStudent, getEnrollmentDetails); // Get enrollment details
 router.put('/:enrollmentId/progress', authenticateStudent, updateProgress); // Update progress
 router.post('/:enrollmentId/rate', authenticateStudent, rateEnrollment); // Rate enrollment
