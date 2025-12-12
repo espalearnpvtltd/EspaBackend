@@ -30,4 +30,35 @@ const courseSchema = new mongoose.Schema({
   isRecommended: { type: Boolean, default: false }
 }, { timestamps: true });
 
+// ✅ Create Indexes for Better Query Performance
+// Single field indexes for common searches
+courseSchema.index({ name: 1 });
+courseSchema.index({ subject: 1 });
+courseSchema.index({ class: 1 });
+courseSchema.index({ isRecommended: 1 });
+courseSchema.index({ teacherId: 1 });
+
+// Compound indexes for frequently combined searches
+courseSchema.index({ class: 1, isRecommended: 1 });
+courseSchema.index({ class: 1, subject: 1 });
+courseSchema.index({ subject: 1, difficulty: 1 });
+courseSchema.index({ class: 1, difficulty: 1 });
+
+// Text indexes for full-text search across multiple fields
+courseSchema.index({ 
+  name: 'text', 
+  description: 'text', 
+  subject: 'text' 
+});
+
+// Index for sorting by ratings
+courseSchema.index({ 'ratings.average': -1 });
+
+// Index for timestamp-based queries
+courseSchema.index({ createdAt: -1 });
+
+// Sparse index for optional fields
+courseSchema.index({ teacherId: 1 }, { sparse: true });
+courseSchema.index({ discountedPrice: 1 }, { sparse: true });
+
 export default mongoose.model('Course', courseSchema);

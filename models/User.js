@@ -24,6 +24,25 @@ const userSchema = new mongoose.Schema({
   status: { type: String, enum: ['active', 'inactive'], default: 'active' },
 }, { timestamps: true });
 
+// ✅ Create Indexes for Better Query Performance
+// Single field indexes for common searches
+userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ role: 1 });
+userSchema.index({ class: 1 });
+userSchema.index({ status: 1 });
+
+// Compound indexes for frequently combined searches
+userSchema.index({ class: 1, role: 1 });
+userSchema.index({ status: 1, role: 1 });
+
+// Index for timestamp-based queries
+userSchema.index({ createdAt: -1 });
+
+// Sparse indexes for optional fields
+userSchema.index({ refreshToken: 1 }, { sparse: true });
+userSchema.index({ resetPasswordToken: 1 }, { sparse: true });
+userSchema.index({ phone: 1 }, { sparse: true });
+
 // Hash password before saving
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();

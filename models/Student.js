@@ -15,6 +15,23 @@ const studentSchema = new mongoose.Schema({
   status: { type: String, enum: ['active', 'inactive'], default: 'active' }
 }, { timestamps: true });
 
+// ✅ Create Indexes for Better Query Performance
+// Single field indexes for common searches
+studentSchema.index({ email: 1 }, { unique: true });
+studentSchema.index({ class: 1 });
+studentSchema.index({ status: 1 });
+
+// Compound indexes for frequently combined searches
+studentSchema.index({ class: 1, status: 1 });
+
+// Index for timestamp-based queries
+studentSchema.index({ createdAt: -1 });
+
+// Sparse indexes for optional fields
+studentSchema.index({ token: 1 }, { sparse: true });
+studentSchema.index({ refreshToken: 1 }, { sparse: true });
+studentSchema.index({ resetPasswordToken: 1 }, { sparse: true });
+
 // Hash password before saving
 studentSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
