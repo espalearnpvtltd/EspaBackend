@@ -1,4 +1,19 @@
 import Course from '../models/Course.js';
+import { 
+  courseContentStructure,
+  getChaptersByCourse,
+  getLessonsByChapter,
+  getAllCourses as getAllCoursesContent,
+  getCourseDetails
+} from '../config/courseContentStructure.js';
+import {
+  coursesByClass,
+  getCoursesByClass,
+  getChaptersByCourseAndClass,
+  getLessonsByChapterAndClass,
+  getAllClasses,
+  getClassDetails
+} from '../config/coursesByClass.js';
 
 // Default course images mapping - Using working Unsplash & Pexels URLs
 const defaultImages = {
@@ -415,6 +430,242 @@ export const searchCourses = async (req, res) => {
       message: `Search results for "${query}"${courseClass ? ` in class ${courseClass}` : ''}`,
       count: courses.length,
       courses
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ✅ Get All Available Courses and Their Content Structure
+export const getCoursesContentList = async (req, res) => {
+  try {
+    const courses = getAllCoursesContent();
+    res.status(200).json({
+      success: true,
+      courses,
+      total: courses.length,
+      message: 'All courses with content structure retrieved'
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ✅ Get Detailed Content for a Specific Course
+export const getCourseContentDetails = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const courseDetails = getCourseDetails(courseId);
+
+    if (!courseDetails) {
+      return res.status(404).json({
+        success: false,
+        message: `Course '${courseId}' not found`
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      course: {
+        id: courseId,
+        ...courseDetails,
+        totalChapters: courseDetails.chapters.length,
+        totalLessons: courseDetails.chapters.reduce((sum, ch) => sum + ch.lessons.length, 0)
+      },
+      message: `Content details for '${courseDetails.name}' retrieved`
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ✅ Get Chapters for a Specific Course
+export const getCourseChapters = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const chapters = getChaptersByCourse(courseId);
+
+    if (!chapters || chapters.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `No chapters found for course '${courseId}'`
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      courseId,
+      chapters,
+      totalChapters: chapters.length,
+      message: `Chapters for course '${courseId}' retrieved`
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ✅ Get Lessons for a Specific Chapter
+export const getChapterLessons = async (req, res) => {
+  try {
+    const { courseId, chapterId } = req.params;
+    const lessons = getLessonsByChapter(courseId, parseInt(chapterId));
+
+    if (!lessons || lessons.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `No lessons found for chapter ${chapterId} in course '${courseId}'`
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      courseId,
+      chapterId: parseInt(chapterId),
+      lessons,
+      totalLessons: lessons.length,
+      message: `Lessons for chapter ${chapterId} retrieved`
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ============================================================
+// 📚 CLASS-BASED COURSE STRUCTURE ENDPOINTS
+// ============================================================
+
+// ✅ Get All Classes (Nursery, LKG, UKG, 1-12)
+export const getAllClassesAvailable = async (req, res) => {
+  try {
+    const classes = getAllClasses();
+    res.status(200).json({
+      success: true,
+      classes,
+      total: classes.length,
+      message: 'All classes retrieved'
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ✅ Get All Courses for a Specific Class
+export const getCoursesForClass = async (req, res) => {
+  try {
+    const { classLevel } = req.params;
+    const courses = getCoursesByClass(classLevel);
+
+    if (!courses || courses.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `No courses found for class '${classLevel}'`
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      classLevel,
+      courses,
+      totalCourses: courses.length,
+      message: `Courses for class '${classLevel}' retrieved`
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ✅ Get Detailed Information for a Specific Class
+export const getClassCourseStructure = async (req, res) => {
+  try {
+    const { classLevel } = req.params;
+    const classData = getClassDetails(classLevel);
+
+    if (!classData) {
+      return res.status(404).json({
+        success: false,
+        message: `Class '${classLevel}' not found`
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      classLevel,
+      classInfo: {
+        name: classData.name,
+        ageGroup: classData.ageGroup,
+        description: classData.description,
+        courseCount: classData.courses.length
+      },
+      courses: classData.courses.map(course => ({
+        id: course.id,
+        name: course.name,
+        subject: course.subject,
+        chapterCount: course.chapters.length,
+        totalLessons: course.chapters.reduce((sum, ch) => sum + ch.lessons.length, 0)
+      })),
+      message: `Complete structure for class '${classLevel}' retrieved`
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ✅ Get Chapters for a Specific Course in a Class
+export const getClassCourseChapters = async (req, res) => {
+  try {
+    const { classLevel, courseId } = req.params;
+    const chapters = getChaptersByCourseAndClass(classLevel, courseId);
+
+    if (!chapters || chapters.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `No chapters found for course '${courseId}' in class '${classLevel}'`
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      classLevel,
+      courseId,
+      chapters,
+      totalChapters: chapters.length,
+      message: `Chapters for course '${courseId}' in class '${classLevel}' retrieved`
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+// ✅ Get Lessons for a Specific Chapter in a Class Course
+export const getClassChapterLessons = async (req, res) => {
+  try {
+    const { classLevel, courseId, chapterId } = req.params;
+    const lessons = getLessonsByChapterAndClass(classLevel, courseId, parseInt(chapterId));
+
+    if (!lessons || lessons.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: `No lessons found for chapter ${chapterId} in course '${courseId}' of class '${classLevel}'`
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      classLevel,
+      courseId,
+      chapterId: parseInt(chapterId),
+      lessons,
+      totalLessons: lessons.length,
+      message: `Lessons for chapter ${chapterId} retrieved`
     });
   } catch (error) {
     console.error(error);

@@ -12,7 +12,16 @@ import {
   getCoursesByExam,
   getFilteredCourses,
   getRecommendedCategories,
-  searchCourses
+  searchCourses,
+  getCoursesContentList,
+  getCourseContentDetails,
+  getCourseChapters,
+  getChapterLessons,
+  getAllClassesAvailable,
+  getCoursesForClass,
+  getClassCourseStructure,
+  getClassCourseChapters,
+  getClassChapterLessons
 } from '../controllers/courseController.js';
 import { verifySecretKey, authenticateUser, authenticateStudent } from '../middleware/auth.js';
 
@@ -47,7 +56,17 @@ router.get('/:id', authenticateStudent, getCourse);
 // Student/User - Add rating (JWT required)
 router.post('/:id/rating', authenticateStudent, addRating);
 
-// Student/User - Get courses by stream (JWT required)
+// ✅ NEW: Course Content Structure APIs (Public)
+router.get('/content/all', getCoursesContentList);
+router.get('/content/:courseId', getCourseContentDetails);
+router.get('/content/:courseId/chapters', getCourseChapters);
+router.get('/content/:courseId/chapters/:chapterId/lessons', getChapterLessons);
 
+// ✅ NEW: Class-Based Course Structure APIs (Public)
+router.get('/classes/all', getAllClassesAvailable);
+router.get('/classes/:classLevel', getClassCourseStructure);
+router.get('/classes/:classLevel/courses', getCoursesForClass);
+router.get('/classes/:classLevel/courses/:courseId/chapters', getClassCourseChapters);
+router.get('/classes/:classLevel/courses/:courseId/chapters/:chapterId/lessons', getClassChapterLessons);
 
 export default router;
