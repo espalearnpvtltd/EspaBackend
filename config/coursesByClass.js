@@ -17,7 +17,6 @@ export const coursesByClass = {
   // ============================================================
   "nursery": {
     name: "Nursery",
-    ageGroup: "3-4 years",
     description: "Foundation learning for early childhood development",
     courses: [
       {
@@ -87,7 +86,6 @@ export const coursesByClass = {
   // ============================================================
   "lkg": {
     name: "LKG",
-    ageGroup: "4-5 years",
     description: "Lower Kindergarten - Pre-reading and pre-math concepts",
     courses: [
       {
@@ -147,7 +145,6 @@ export const coursesByClass = {
   // ============================================================
   "ukg": {
     name: "UKG",
-    ageGroup: "5-6 years",
     description: "Upper Kindergarten - Introduction to reading and basic math",
     courses: [
       {
@@ -206,7 +203,6 @@ export const coursesByClass = {
   // ============================================================
   "1": {
     name: "Class 1",
-    ageGroup: "6-7 years",
     description: "Class 1 - Foundational academics with reading, writing, and basic math",
     courses: [
       {
@@ -296,7 +292,6 @@ export const coursesByClass = {
   // ============================================================
   "2": {
     name: "Class 2",
-    ageGroup: "7-8 years",
     description: "Class 2 - Building reading comprehension and math concepts",
     courses: [
       {
@@ -354,7 +349,6 @@ export const coursesByClass = {
 
   "3": {
     name: "Class 3",
-    ageGroup: "8-9 years",
     description: "Class 3 - Intermediate academics with expanded concepts",
     courses: [
       {
@@ -412,7 +406,6 @@ export const coursesByClass = {
 
   "4": {
     name: "Class 4",
-    ageGroup: "9-10 years",
     description: "Class 4 - Advanced primary concepts",
     courses: [
       {
@@ -474,7 +467,6 @@ export const coursesByClass = {
 
   "5": {
     name: "Class 5",
-    ageGroup: "10-11 years",
     description: "Class 5 - Final primary year with comprehensive learning",
     courses: [
       {
@@ -542,7 +534,6 @@ export const coursesByClass = {
   // ============================================================
   "6": {
     name: "Class 6",
-    ageGroup: "11-12 years",
     description: "Class 6 - Introduction to secondary education",
     courses: [
       {
@@ -621,7 +612,6 @@ export const coursesByClass = {
 
   "7": {
     name: "Class 7",
-    ageGroup: "12-13 years",
     description: "Class 7 - Secondary education with advanced concepts",
     courses: [
       {
@@ -684,7 +674,6 @@ export const coursesByClass = {
 
   "8": {
     name: "Class 8",
-    ageGroup: "13-14 years",
     description: "Class 8 - Intermediate secondary with specialized subjects",
     courses: [
       {
@@ -747,7 +736,6 @@ export const coursesByClass = {
 
   "9": {
     name: "Class 9",
-    ageGroup: "14-15 years",
     description: "Class 9 - Pre-board secondary education",
     courses: [
       {
@@ -817,7 +805,6 @@ export const coursesByClass = {
 
   "10": {
     name: "Class 10",
-    ageGroup: "15-16 years",
     description: "Class 10 - Board exams preparation",
     courses: [
       {
@@ -903,7 +890,6 @@ export const coursesByClass = {
   // ============================================================
   "11": {
     name: "Class 11",
-    ageGroup: "16-17 years",
     description: "Class 11 - Senior secondary with stream specialization (Science/Commerce/Arts)",
     courses: [
       {
@@ -1012,7 +998,6 @@ export const coursesByClass = {
 
   "12": {
     name: "Class 12",
-    ageGroup: "17-18 years",
     description: "Class 12 - Final board exams and competitive exams preparation",
     courses: [
       {
@@ -1212,7 +1197,6 @@ export const getAllClasses = () => {
   return Object.entries(coursesByClass).map(([key, value]) => ({
     id: key,
     name: value.name,
-    ageGroup: value.ageGroup,
     description: value.description,
     courseCount: value.courses.length
   }));

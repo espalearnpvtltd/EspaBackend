@@ -599,7 +599,6 @@ export const getClassCourseStructure = async (req, res) => {
       classLevel,
       classInfo: {
         name: classData.name,
-        ageGroup: classData.ageGroup,
         description: classData.description,
         courseCount: classData.courses.length
       },
