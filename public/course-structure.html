@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESPA Learning - Course Structure</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            padding: 30px 20px;
+            border-radius: 12px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        header h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .breadcrumb {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+
+        .breadcrumb a {
+            color: #667eea;
+            text-decoration: none;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .breadcrumb span {
+            color: #999;
+            margin: 0 5px;
+        }
+
+        /* Classes Grid */
+        .classes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .class-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-left: 5px solid #667eea;
+        }
+
+        .class-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+            border-left-color: #764ba2;
+        }
+
+        .class-card .badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            margin-bottom: 10px;
+        }
+
+        .class-card h3 {
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.4em;
+        }
+
+        .class-card .age-group {
+            color: #888;
+            font-size: 0.9em;
+            margin-bottom: 12px;
+        }
+
+        .class-card .course-count {
+            display: flex;
+            align-items: center;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .class-card .course-count::before {
+            content: "📚";
+            margin-right: 8px;
+            font-size: 1.2em;
+        }
+
+        /* Courses Section */
+        .courses-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+            color: #333;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+        }
+
+        .section-title::before {
+            content: "📖";
+            margin-right: 15px;
+            font-size: 1.2em;
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .course-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .course-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+
+        .course-card .subject {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            margin-bottom: 12px;
+        }
+
+        .course-card h4 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+        }
+
+        .course-stats {
+            display: flex;
+            gap: 20px;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .course-stats .stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .course-stats .stat-number {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .course-stats .stat-label {
+            font-size: 0.8em;
+            opacity: 0.9;
+        }
+
+        /* Chapters Section */
+        .chapters-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .chapter-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .chapter-item {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .chapter-item:hover {
+            background: #f0f1ff;
+            border-left-color: #764ba2;
+            transform: translateX(5px);
+        }
+
+        .chapter-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        .chapter-title {
+            color: #333;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .lesson-count {
+            color: #667eea;
+            font-size: 0.9em;
+            margin-top: 8px;
+            margin-left: 50px;
+        }
+
+        /* Lessons Section */
+        .lessons-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-left: 50px;
+            margin-top: 15px;
+        }
+
+        .lesson-item {
+            background: white;
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .lesson-item:hover {
+            background: #f0f1ff;
+            border-color: #667eea;
+            box-shadow: 0 3px 10px rgba(102, 126, 234, 0.1);
+        }
+
+        .lesson-info {
+            flex: 1;
+        }
+
+        .lesson-title {
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .lesson-type {
+            display: inline-block;
+            background: #e8f4ff;
+            color: #667eea;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-right: 8px;
+        }
+
+        .lesson-duration {
+            color: #888;
+            font-size: 0.9em;
+        }
+
+        .lesson-arrow {
+            color: #667eea;
+            font-size: 1.2em;
+            margin-left: 15px;
+        }
+
+        /* Loading and Error States */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+
+        .spinner {
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            color: #c00;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #c00;
+        }
+
+        /* Back Button */
+        .back-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .back-btn:hover {
+            background: #764ba2;
+            transform: translateX(-3px);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .classes-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .section-title {
+                font-size: 1.5em;
+            }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header id="header">
+            <h1>📚 ESPA Learning</h1>
+            <p>Complete Course Structure - Nursery to Class 12</p>
+        </header>
+
+        <!-- Breadcrumb -->
+        <div class="breadcrumb" id="breadcrumb">
+            <a onclick="showClasses()">All Classes</a>
+        </div>
+
+        <!-- Main Content -->
+        <div id="content">
+            <!-- Classes View -->
+            <div id="classesView">
+                <div class="classes-grid" id="classesGrid"></div>
+            </div>
+
+            <!-- Course Detail View -->
+            <div id="courseDetailView" style="display: none;">
+                <button class="back-btn" onclick="showClasses()">← Back to Classes</button>
+                <div class="courses-section" id="coursesSection"></div>
+            </div>
+
+            <!-- Chapter Detail View -->
+            <div id="chapterDetailView" style="display: none;">
+                <button class="back-btn" onclick="goBack()">← Back</button>
+                <div class="chapters-section" id="chaptersSection"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5001/api/courses';
+        let currentClass = null;
+        let currentCourse = null;
+        let navigation = [];
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            showClasses();
+        });
+
+        // Show All Classes
+        async function showClasses() {
+            try {
+                document.getElementById('classesView').style.display = 'block';
+                document.getElementById('courseDetailView').style.display = 'none';
+                document.getElementById('chapterDetailView').style.display = 'none';
+                document.getElementById('breadcrumb').innerHTML = '<a onclick="showClasses()">All Classes</a>';
+                navigation = [];
+                currentClass = null;
+                currentCourse = null;
+
+                const response = await fetch(`${API_BASE}/classes/all`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    showError(data.message);
+                    return;
+                }
+
+                const classes = data.classes;
+                const grid = document.getElementById('classesGrid');
+                grid.innerHTML = '';
+
+                classes.forEach(cls => {
+                    const card = document.createElement('div');
+                    card.className = 'class-card';
+                    card.onclick = () => showClassCourses(cls.id, cls.name);
+                    card.innerHTML = `
+                        <span class="badge">${cls.ageGroup}</span>
+                        <h3>${cls.name}</h3>
+                        <div class="age-group">${cls.ageGroup}</div>
+                        <div class="course-count">${cls.courseCount} Courses</div>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error loading classes:', error);
+                showError('Failed to load classes');
+            }
+        }
+
+        // Show Courses for a Class
+        async function showClassCourses(classLevel, className) {
+            try {
+                currentClass = { level: classLevel, name: className };
+                navigation = [{ type: 'class', level: classLevel, name: className }];
+                
+                document.getElementById('classesView').style.display = 'none';
+                document.getElementById('courseDetailView').style.display = 'block';
+                document.getElementById('chapterDetailView').style.display = 'none';
+
+                updateBreadcrumb();
+
+                const response = await fetch(`${API_BASE}/classes/${classLevel}/courses`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    showError(data.message);
+                    return;
+                }
+
+                const coursesSection = document.getElementById('coursesSection');
+                const sectionTitle = document.createElement('div');
+                sectionTitle.className = 'section-title';
+                sectionTitle.innerHTML = `${className} - Courses`;
+
+                const coursesGrid = document.createElement('div');
+                coursesGrid.className = 'courses-grid';
+
+                data.courses.forEach(course => {
+                    const card = document.createElement('div');
+                    card.className = 'course-card';
+                    card.onclick = () => showCourseChapters(classLevel, course.id, course.name);
+                    card.innerHTML = `
+                        <span class="subject">${course.subject}</span>
+                        <h4>${course.name}</h4>
+                        <div class="course-stats">
+                            <div class="stat">
+                                <div class="stat-number">${course.chapterCount}</div>
+                                <div class="stat-label">Chapters</div>
+                            </div>
+                            <div class="stat">
+                                <div class="stat-number">${course.totalLessons}</div>
+                                <div class="stat-label">Lessons</div>
+                            </div>
+                        </div>
+                    `;
+                    coursesGrid.appendChild(card);
+                });
+
+                coursesSection.innerHTML = '';
+                coursesSection.appendChild(sectionTitle);
+                coursesSection.appendChild(coursesGrid);
+            } catch (error) {
+                console.error('Error loading courses:', error);
+                showError('Failed to load courses');
+            }
+        }
+
+        // Show Chapters for a Course
+        async function showCourseChapters(classLevel, courseId, courseName) {
+            try {
+                currentCourse = { id: courseId, name: courseName, classLevel: classLevel };
+                navigation.push({ type: 'course', id: courseId, name: courseName });
+
+                document.getElementById('classesView').style.display = 'none';
+                document.getElementById('courseDetailView').style.display = 'none';
+                document.getElementById('chapterDetailView').style.display = 'block';
+
+                updateBreadcrumb();
+
+                const response = await fetch(`${API_BASE}/classes/${classLevel}/courses/${courseId}/chapters`);
+                const data = await response.json();
+
+                if (!data.success) {
+                    showError(data.message);
+                    return;
+                }
+
+                const chaptersSection = document.getElementById('chaptersSection');
+                const sectionTitle = document.createElement('div');
+                sectionTitle.className = 'section-title';
+                sectionTitle.innerHTML = `${courseName} - Chapters`;
+
+                const chapterList = document.createElement('div');
+                chapterList.className = 'chapter-list';
+
+                data.chapters.forEach(chapter => {
+                    const chapterDiv = document.createElement('div');
+                    chapterDiv.className = 'chapter-item';
+                    
+                    const lessonsHtml = chapter.lessons.map(lesson => `
+                        <div class="lesson-item">
+                            <div class="lesson-info">
+                                <div class="lesson-title">${lesson.title}</div>
+                                <div>
+                                    <span class="lesson-type">${lesson.type}</span>
+                                    <span class="lesson-duration">⏱️ ${lesson.duration}</span>
+                                </div>
+                            </div>
+                            <div class="lesson-arrow">→</div>
+                        </div>
+                    `).join('');
+
+                    chapterDiv.innerHTML = `
+                        <div style="display: flex; align-items: flex-start;">
+                            <span class="chapter-number">${chapter.id}</span>
+                            <div style="flex: 1;">
+                                <div class="chapter-title">${chapter.title}</div>
+                                <div class="lesson-count">📚 ${chapter.lessons.length} lessons</div>
+                                <div class="lessons-list">
+                                    ${lessonsHtml}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    chapterList.appendChild(chapterDiv);
+                });
+
+                chaptersSection.innerHTML = '';
+                chaptersSection.appendChild(sectionTitle);
+                chaptersSection.appendChild(chapterList);
+            } catch (error) {
+                console.error('Error loading chapters:', error);
+                showError('Failed to load chapters');
+            }
+        }
+
+        // Go Back
+        function goBack() {
+            if (navigation.length === 1) {
+                showClasses();
+            } else if (navigation.length === 2) {
+                const classNav = navigation[0];
+                showClassCourses(classNav.level, classNav.name);
+            }
+        }
+
+        // Update Breadcrumb
+        function updateBreadcrumb() {
+            const breadcrumb = document.getElementById('breadcrumb');
+            let html = '<a onclick="showClasses()">All Classes</a>';
+            
+            navigation.forEach((nav, index) => {
+                html += ' <span>›</span> ';
+                if (index === navigation.length - 1) {
+                    html += `<span>${nav.name}</span>`;
+                } else {
+                    if (nav.type === 'class') {
+                        html += `<a onclick="showClassCourses('${nav.level}', '${nav.name}')">${nav.name}</a>`;
+                    } else {
+                        html += `<a onclick="showCourseChapters('${nav.classLevel}', '${nav.id}', '${nav.name}')">${nav.name}</a>`;
+                    }
+                }
+            });
+            
+            breadcrumb.innerHTML = html;
+        }
+
+        // Show Error
+        function showError(message) {
+            const error = document.createElement('div');
+            error.className = 'error';
+            error.textContent = `❌ ${message}`;
+            document.getElementById('content').insertBefore(error, document.getElementById('content').firstChild);
+            setTimeout(() => error.remove(), 5000);
+        }
+    </script>
+</body>
+</html>
