@@ -13,7 +13,7 @@ const courseSchema = new mongoose.Schema({
   price: { type: Number, default: 0 }, // Course price in INR
   discountedPrice: { type: Number }, // Price after discount
   duration: { type: Number }, // in hours
-  teacherId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+  teacherId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   filepath: { type: String },
   classId: { type: mongoose.Schema.Types.ObjectId, ref: 'Class' },
   pictures: [{ type: String }],
